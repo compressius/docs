@@ -1,0 +1,63 @@
+---
+title: "CMX Frequently Asked Questions"
+sidebarTitle: "FAQ"
+description: "Answers to the most common questions about CMX: how it works, privacy, data handling, supported agents, and whether it will always reduce your bill."
+---
+
+Common questions about CMX answered. If you don't find what you need here, check the documentation or contact support.
+
+<AccordionGroup>
+  <Accordion title="What is Compressius Maximus (CMX)?">
+    Compressius Maximus (CMX) is a free tool for AI coding agents. It runs a local gateway that compresses the context your agent sends to your model provider. Requests pass through unchanged until a session grows large enough to be worth compressing.
+  </Accordion>
+
+  <Accordion title="Is CMX free?">
+    Yes. Compressius Maximus is free to use, with no subscriptions or paid plans. Your model provider's normal usage charges still apply.
+  </Accordion>
+
+  <Accordion title="How does CMX reduce token usage?">
+    Once a session passes the configured minimum size, CMX asks your model to summarize eligible older context. CMX checks each proposal for protected calls, estimated savings, and recent-context preservation, then applies accepted summaries to later requests.
+  </Accordion>
+
+  <Accordion title="Which coding agents and model providers work with CMX?">
+    Codex and OpenCode are verified coding agents. Other tools work if they accept a custom API base URL and speak OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages. The [compatibility guide](https://compressi.us/docs#harness-setup) lists verified setups and known limitations.
+  </Accordion>
+
+  <Accordion title="Does compression remove information?">
+    Yes. Summarization is lossy, so a summary can omit details the model did not include. CMX reduces the risk by preserving recent context, by never summarizing protected tool calls or their results, and by excluding opaque content such as reasoning blocks from compression proposals.
+  </Accordion>
+
+  <Accordion title="Where does my data go?">
+    Your data is handled in three distinct places:
+
+    - **On your device:** session state, compression decisions, aggregate counters, and provider credentials — kept in memory and never written to disk.
+    - **Your configured model provider:** prompts, context, and responses are sent as part of normal operation. Compression changes what is sent, not where it goes.
+    - **CMX services:** signed aggregate usage counters for authenticated accounts only — never prompts, responses, code, or session content.
+  </Accordion>
+
+  <Accordion title="Do I need an account?">
+    Yes. CMX requires an account, and there is no guest mode. Signing in pairs your device with the dashboard. Creating an account is free.
+  </Accordion>
+
+  <Accordion title="Will CMX always reduce my API bill?">
+    No. Savings depend on your workload, session length, compression overhead, and your provider's caching. CMX approves compression only when its cost checks estimate a net saving, but a lower bill is never guaranteed.
+  </Accordion>
+
+  <Accordion title="Does CMX work without an internet connection?">
+    CMX compression works locally without internet access. Account sync, dashboard access, and update checks require an internet connection. If CMX Cloud is unavailable, local compression continues working — your coding sessions are not interrupted.
+  </Accordion>
+
+  <Accordion title="Can I see what was compressed?">
+    CMX does not expose the exact content of individual compression proposals. You can see aggregate statistics in `cmx stats` and in the dashboard, which show processed tokens, estimated savings, and cache rates.
+
+    ```bash
+    cmx stats
+    ```
+
+    Raw request logging is opt-in and local only. You can enable it for debugging on your own machine — it is never sent to CMX Cloud.
+
+    ```bash
+    cmx logs status
+    ```
+  </Accordion>
+</AccordionGroup>

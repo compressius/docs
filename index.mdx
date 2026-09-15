@@ -1,20 +1,57 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "CMX: Cut Your AI Coding Costs with Context Compression"
+sidebarTitle: "Home"
+description: "Compressius Maximus (CMX) is a free local gateway that compresses AI coding agent context, reducing token usage and lowering your model provider bill."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+CMX (Compressius Maximus) is a free local gateway that sits between your AI coding agent and your model provider, compressing the context your agent sends so you pay for fewer input tokens. It runs entirely on your machine at `127.0.0.1:17322` — no subscriptions, no paid plans, no prompts leaving your device.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Install CMX, sign in, and connect your coding agent in under a minute.
+  </Card>
+  <Card title="Installation" icon="download" href="/installation">
+    Choose your platform and install method — npm, pnpm, or a standalone binary.
+  </Card>
+  <Card title="How Compression Works" icon="brain" href="/how-compression-works">
+    Learn how CMX uses model-directed summaries and gateway policy to shrink context safely.
+  </Card>
+  <Card title="CLI Reference" icon="terminal" href="/cli-reference">
+    Every CMX command, grouped by task — from setup to stats to uninstall.
+  </Card>
+</CardGroup>
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+## How It Works
+
+<Steps>
+  <Step title="Install and Pair">
+    Run `cmx setup` in your terminal. Sign in through your browser, pair this device, and let CMX connect your coding agent. The local gateway starts automatically.
+  </Step>
+  <Step title="Keep Coding">
+    Your agent sends requests to `127.0.0.1:17322` exactly as before. Recent turns, protected tool calls, and opaque content are always left untouched.
+  </Step>
+  <Step title="Context Shrinks When It Pays">
+    Once a session grows large enough, CMX asks your model to summarize eligible older turns. Gateway policy checks the proposal for safety and estimated net savings before anything is applied.
+  </Step>
+</Steps>
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Local by Default" icon="lock">
+    The gateway runs on your machine. Prompts, responses, and source code never touch CMX servers — only signed aggregate counters reach the optional cloud dashboard.
+  </Card>
+  <Card title="Model-Directed Compression" icon="wand-magic-sparkles">
+    Your model proposes what can be summarized. CMX policy verifies every proposal against estimated savings, recent-context preservation, and protected call checks before applying it.
+  </Card>
+  <Card title="Protected Tool Calls" icon="shield-check">
+    `task`, `skill`, `write`, and `edit` calls — and their results — are never compressed, keeping the actions that matter most intact.
+  </Card>
+  <Card title="Free Forever" icon="circle-dollar-to-slot">
+    CMX has no subscriptions or paid plans. Unlimited local compression, Codex and OpenCode setup, and a token savings dashboard are included for every user at no cost.
+  </Card>
+</CardGroup>
+
+<Note>
+  CMX is free to use. Your model provider's normal usage charges still apply.
+</Note>

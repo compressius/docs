@@ -1,0 +1,71 @@
+---
+title: "Understanding Your CMX Token Savings"
+sidebarTitle: "Token Savings"
+description: "How to read CMX token metrics: what 'tokens handled', 'estimated net saved', and dashboard stats mean, and what affects your actual API bill."
+---
+
+CMX tracks token activity locally and syncs aggregate counts to your dashboard. Understanding these numbers helps you evaluate how much compression is happening and what to expect on your provider bill. The stats CMX reports are estimates based on token counts reported through the local gateway — your model provider's own usage dashboard remains the authoritative source for charges.
+
+## Viewing Your Stats
+
+You have two ways to check your CMX token activity:
+
+<Tabs>
+  <Tab title="Terminal">
+    Run the following command to see today's token and compression statistics in your terminal:
+
+    ```bash
+    cmx stats
+    ```
+
+    This shows local activity for the current day, including tokens handled, estimated net saved, and cache reads.
+  </Tab>
+  <Tab title="Dashboard">
+    Open the web dashboard with:
+
+    ```bash
+    cmx dashboard
+    ```
+
+    Or visit [compressi.us/dashboard](https://compressi.us/dashboard) directly. The dashboard shows your account's aggregate usage over time, including daily totals and an all-time estimate.
+  </Tab>
+</Tabs>
+
+## Key Metrics
+
+CMX surfaces three core numbers. Here is what each one means:
+
+**Tokens Handled**
+
+The total reported token activity that passed through CMX. This is not a word count or a line count — it reflects token usage as reported by your model provider's API responses. A single large prompt or a long assistant reply can each account for thousands of tokens.
+
+**Estimated Net Saved**
+
+The number of tokens CMX estimates were avoided, after subtracting the overhead of the compression requests themselves. Because each compression round-trip costs tokens, this number can be small or even slightly negative in short sessions. As sessions grow longer, the savings from summarizing large spans of repetitive history outpace the overhead.
+
+**Cache Reads**
+
+When CMX has already produced a summary for a given context span, it reuses that cached result rather than making another summarization request. Cache reads are counted separately from estimated savings and do not add to compression overhead.
+
+## What Affects Savings
+
+Not every session will produce the same savings. Several factors influence how much compression CMX can apply:
+
+- **Session length**: Compression only activates above `min_context_tokens` (default: 32,000 tokens). The longer a session runs, the more repetitive context accumulates and the more CMX can summarize away.
+- **Workload type**: Repetitive back-and-forth exchanges — iterating on the same file, debugging the same error — compress more effectively than a series of isolated, unrelated questions where each turn introduces entirely new context.
+- **Provider caching**: If your provider caches prompt prefixes (as some do for long shared prefixes), compression savings may partially overlap with the savings your provider already gives you from cache hits. The two mechanisms are not additive in all cases.
+- **Compression overhead**: Every summarization request costs tokens. CMX's policy requires the estimated saving to exceed that overhead before applying a summary, so sessions that are just above the minimum threshold may see modest or no compression.
+
+## Token Savings vs. Bill Savings
+
+A reduction in tokens does not translate directly into the same percentage reduction on your provider bill. Model providers charge at different rates for input tokens, cached input tokens, and output tokens. A session where CMX reduces input tokens significantly may save less in dollar terms if your provider already applies prefix caching, or more if the reduced tokens are in an expensive tier.
+
+The only source of truth for your actual charges is your model provider's billing and usage dashboard. CMX's estimates are useful for understanding compression activity and trend direction, but they are not a substitute for your provider's records.
+
+<Warning>
+  CMX provides estimates. Your model provider's billing is always authoritative for actual charges. If activity appears missing from CMX stats, that is not proof of zero usage — requests may have passed through without triggering compression, or stats may not have refreshed yet.
+</Warning>
+
+<Tip>
+  To see CMX's effect clearly, compare stats from a short session (a few quick questions) against a long coding session (an extended refactoring run or debugging marathon). The difference in estimated net saved between the two makes it easy to see where compression is actually kicking in.
+</Tip>

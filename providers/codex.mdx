@@ -1,0 +1,78 @@
+---
+title: "Connect Codex to CMX for Context Compression"
+sidebarTitle: "Codex"
+description: "Step-by-step guide to routing OpenAI Codex through CMX so your coding sessions benefit from automatic context compression."
+---
+
+Connect Codex to CMX so every request from Codex passes through the local gateway. CMX compresses repeated context in the background, reducing the tokens sent to your model provider on each turn — without changing how you use Codex.
+
+<Note>
+  **Prerequisites:** CMX must be installed and signed in on your device. Codex must already be installed with a working model provider sign-in. CMX does not replace your provider account; you continue signing in through Codex as usual.
+</Note>
+
+<Steps>
+  <Step title="Set Up CMX">
+    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+
+    ```bash
+    cmx setup
+    ```
+
+    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+  </Step>
+
+  <Step title="Connect Codex">
+    Open the CMX terminal UI and connect Codex to your provider:
+
+    ```bash
+    cmx
+    ```
+
+    1. Navigate to **CONFIG → Codex**.
+    2. Select your connection from the list.
+    3. Click **Connect**.
+    4. Restart Codex so it picks up the new routing through CMX.
+
+    Codex will now send all requests through the CMX gateway instead of directly to your provider.
+  </Step>
+
+  <Step title="Verify the Connection">
+    Confirm that Codex is routing through CMX correctly:
+
+    ```bash
+    cmx harness verify
+    ```
+
+    ```bash
+    cmx status
+    ```
+
+    Send a request from Codex as you normally would in a coding session. Then check CMX for activity:
+
+    ```bash
+    cmx stats
+    ```
+
+    New requests should appear in the stats output. If you see activity, the connection is working.
+  </Step>
+</Steps>
+
+<Note>
+  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
+</Note>
+
+## Troubleshooting
+
+If requests from Codex are not appearing in `cmx stats` after a coding session:
+
+1. **Restart Codex** — the new routing only takes effect after a full restart.
+2. **Check the selected connection** — open CONFIG → Codex in CMX and confirm the correct provider is connected.
+3. **Run the diagnostics command:**
+
+   ```bash
+   cmx doctor
+   ```
+
+For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
+
+Looking for a different integration? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) if your tool is not Codex or OpenCode.

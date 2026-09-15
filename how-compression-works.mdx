@@ -1,0 +1,70 @@
+---
+title: "How CMX Compresses AI Context Automatically"
+sidebarTitle: "How It Works"
+description: "Understand CMX's model-directed compression pipeline: when it triggers, what stays protected, and how policy checks ensure only net-positive compressions are applied."
+---
+
+CMX sits as a local proxy between your coding agent and your model provider. As a session grows, it uses the model itself to propose summaries of older context — then applies a deterministic policy to decide whether each proposal is safe and economical. If a proposal passes, the summary replaces the older turns in subsequent requests. If it fails or is rejected, the original request passes through to your provider unchanged.
+
+## The Compression Pipeline
+
+Every request your coding agent sends travels through the following sequence before reaching your model provider:
+
+<Steps>
+  <Step title="Your agent sends a request">
+    Your coding agent sends its request to `127.0.0.1:17322`, the local CMX gateway address. From your agent's perspective, this looks like a normal API call to your provider.
+  </Step>
+  <Step title="CMX checks the session size">
+    CMX inspects the current session size. If the context has not yet crossed the configured `min_context_tokens` threshold (default: 32,000 tokens), the request passes through untouched and compression is skipped entirely.
+  </Step>
+  <Step title="CMX asks the model to summarize">
+    When the session is large enough, CMX sends a separate request asking the model to produce a factual summary of eligible older context turns — those not protected by policy and not part of the preserved recent tail.
+  </Step>
+  <Step title="The proposal is checked against gateway policy">
+    CMX evaluates the summary proposal against four criteria: it must not touch any protected tool calls or their results, it must preserve the recent context tail, it must exclude system instructions and opaque content, and the estimated token saving after compression overhead must be positive.
+  </Step>
+  <Step title="If approved, the summary is applied">
+    The accepted summary replaces the older turns. All future requests in the session carry the compressed context instead of the full history, reducing tokens sent to your provider.
+  </Step>
+  <Step title="If rejected or failed, the original passes through">
+    If the proposal fails any policy check or the compression request itself errors out, CMX leaves the original context intact and forwards the request to your provider as-is. Nothing is lost.
+  </Step>
+</Steps>
+
+## What Is Always Protected
+
+CMX never modifies the following, regardless of session length or compression settings:
+
+| Protected element | Why it is excluded |
+|---|---|
+| `task`, `skill`, `write`, and `edit` tool calls and their results | These represent irreversible or high-stakes actions. Summarizing them could silently drop critical intent or output. |
+| Recent context (last `preserve_tail_tokens` tokens, default: 12,000) | Your most recent work is always kept verbatim so the model retains full, accurate context for the current task. |
+| System instructions | System prompts define the agent's behaviour and are outside the scope of session summarization. |
+| Opaque content, such as reasoning blocks | CMX cannot inspect or summarize content it cannot reliably parse, so such content is always preserved intact. |
+| Complete tool exchanges | Tool call and result pairs are kept together and untouched to avoid breaking the logical pairing the model depends on. |
+
+## When Compression Starts
+
+Compression only activates once a session exceeds `min_context_tokens` (default: 32,000 tokens). Short conversations — a few quick questions, a single file edit — will not compress at all. This is intentional: the overhead of a compression request is not worth it for small contexts.
+
+The longer a session runs, the more repetitive history it accumulates: earlier drafts, resolved errors, superseded reasoning. That's exactly where CMX delivers the most value. A single-day refactoring session or a long debugging run will see more compression activity than a brief back-and-forth exchange.
+
+You can adjust `min_context_tokens` in your `cmx.config.toml` if you want compression to activate earlier or later in a session.
+
+## Model-Directed Summaries
+
+Rather than applying heuristic rules about what to drop, CMX asks the model to propose its own summary of the context span. The model has already read every message in the session, so it is better positioned than any fixed algorithm to judge what is essential and what is repetitive history.
+
+CMX's role in this exchange is as policy enforcer, not guesser. It defines the rules — what is protected, what minimum saving is required, what must be preserved — and the model does the compression work within those boundaries. If the model's proposal does not meet the policy criteria, CMX discards it and forwards the original.
+
+Summaries are cached in memory on your machine, scoped to the upstream endpoint, model, and source content. The same compressible span will not trigger a redundant summarization request if a cached result already covers it.
+
+## Local by Design
+
+Everything sensitive stays on your machine. Your prompts, source code, and model responses are processed locally by the CMX gateway process. They travel from your agent to CMX at `127.0.0.1`, and from CMX to your configured model provider — but they never pass through CMX's servers.
+
+The only data CMX services receive are signed aggregate counters: totals like tokens handled and estimated savings. No prompts, no code, no session content.
+
+<Note>
+  CMX approves compression only when its cost checks estimate a net token saving. A lower bill is not guaranteed, but the policy prevents compression from ever costing more tokens than it saves.
+</Note>

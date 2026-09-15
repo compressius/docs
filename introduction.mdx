@@ -1,0 +1,49 @@
+---
+title: "What Is Compressius Maximus (CMX)?"
+sidebarTitle: "Introduction"
+description: "Learn how CMX reduces AI coding costs by compressing repeated context locally, so your model provider receives leaner, cheaper requests."
+---
+
+Compressius Maximus (CMX) is a free local gateway that sits between your AI coding agent and your model provider. Every time your agent sends a request, CMX inspects the context, compresses the repetitive parts, and forwards a leaner payload to your provider — so you spend fewer tokens without changing how you code.
+
+## The Problem CMX Solves
+
+Long coding sessions accumulate enormous context. Every new request carries the full history of earlier turns: superseded attempts, resolved errors, and exchanges the model no longer needs word-for-word. Your provider charges for every input token in that payload, so the longer a session runs, the more you pay just to re-send history that doesn't change the answer.
+
+Most tools that address this problem use static heuristics to decide what to drop. The result is unpredictable: useful context disappears, or nothing gets trimmed at all.
+
+## How CMX Helps
+
+CMX takes a model-directed approach. When a session grows past a configurable threshold, CMX asks your model to propose a factual summary of eligible older turns. Before applying anything, a deterministic gateway policy checks the proposal against four criteria:
+
+- **Protected tool calls** — `task`, `skill`, `write`, and `edit` calls and their results are never touched.
+- **Recent context** — the most recent turns are always preserved in full.
+- **Estimated savings** — compression only proceeds when the net token saving is positive.
+- **Opaque content** — anything CMX cannot safely parse passes through unchanged.
+
+If a proposal fails any check, the original request is forwarded untouched. Accepted summaries are cached in memory and reused for subsequent requests in the same session. CMX runs entirely on your machine at `127.0.0.1:17322` and proxies requests to the provider you already use — your provider credentials are never seen by CMX.
+
+## Who It's For
+
+CMX is built for developers who use AI coding agents and want their API bill to shrink automatically. It works with:
+
+- **Codex** — verified integration with automatic harness setup
+- **OpenCode** — verified integration with per-provider connection
+- **Any OpenAI- or Anthropic-compatible agent** — any tool that accepts a custom base URL and speaks OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages
+
+If you run long coding sessions where context grows across many turns, CMX will find opportunities to compress that history and pass savings on to you. Short sessions or sessions that rarely revisit earlier context will see smaller gains.
+
+## Privacy & Security
+
+CMX is local-first by design. The gateway binds exclusively to `127.0.0.1:17322` — it never listens on a network-accessible interface. Your prompts, source code, and model responses travel only between your machine and your configured provider. CMX servers never receive your conversation content.
+
+Provider credentials are held in memory for the lifetime of the gateway process and are never written to disk. The only data that leaves your device is a signed aggregate counter sent to your CMX account — a total of tokens handled and saved, with no attached content.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Install CMX, sign in, and connect your coding agent in four steps.
+  </Card>
+  <Card title="How Compression Works" icon="arrows-to-circle" href="/how-compression-works">
+    Understand the policy checks and model-directed summarization behind CMX.
+  </Card>
+</CardGroup>

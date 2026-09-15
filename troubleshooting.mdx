@@ -1,0 +1,122 @@
+---
+title: "Troubleshoot CMX Connection and Compression Issues"
+sidebarTitle: "Troubleshooting"
+description: "Fix common CMX problems: gateway won't start, agent not routing through CMX, sign-in failures, missing compression, and provider sign-in errors."
+---
+
+If CMX isn't starting, your agent isn't routing through it, or compression isn't happening, this guide covers the most common causes and fixes. For anything not listed here, run `cmx doctor` and contact support.
+
+<Tip>
+  Run `cmx doctor` first — it diagnoses your installation and connections in one command.
+</Tip>
+
+<AccordionGroup>
+  <Accordion title="CMX Will Not Start">
+    Run `cmx stop`, then `cmx start`. If that doesn't resolve the issue, run `cmx doctor` and contact support with the output — remove any private information before sharing it.
+
+    ```bash
+    cmx stop
+    cmx start
+    ```
+
+    If the problem persists after restarting:
+
+    ```bash
+    cmx doctor
+    ```
+
+    Send the output to hello@compressi.us along with your OS, CMX version, and a description of what happened.
+  </Accordion>
+
+  <Accordion title="CMX Asks Me to Sign In Again">
+    Your local session has expired or been invalidated. Run `cmx login` and complete the browser sign-in on this device, then retry your coding session.
+
+    ```bash
+    cmx login
+    ```
+
+    After you finish signing in through the browser, restart your coding agent and continue your session as normal.
+  </Accordion>
+
+  <Accordion title="Compression Isn't Happening">
+    First, confirm that CMX is receiving requests from your agent at all. Run `cmx stats` while actively using your agent and check whether new request counts appear.
+
+    ```bash
+    cmx stats
+    ```
+
+    Keep in mind:
+
+    - Short conversations may show little or no savings — CMX only compresses once a session crosses the configured minimum context size.
+    - Try a longer coding session where context accumulates over several turns.
+    - Check that the `min_context_tokens` threshold in your `cmx.config.toml` is set to a reasonable value for your typical session length.
+
+    ```toml
+    # cmx.config.toml
+    min_context_tokens = 1000
+    ```
+
+    If requests aren't appearing in `cmx stats` at all, your agent may not be routing through CMX — see the **My Coding Session Does Not Appear in CMX** entry below.
+  </Accordion>
+
+  <Accordion title="My Provider Sign-in Fails">
+    A provider sign-in failure usually means your provider credentials need to be refreshed. Work through these steps in order:
+
+    1. Check your provider account and confirm it is active and in good standing.
+    2. Sign in to your provider again through your coding agent's own settings.
+    3. Open `cmx` and navigate to CONFIG → your agent → your provider connection.
+    4. Check the connection status and reconnect if needed.
+    5. Restart your coding agent and try a new request.
+
+    If the failure continues, check your provider's status page and confirm your API key or session hasn't been revoked.
+  </Accordion>
+
+  <Accordion title="My Coding Session Does Not Appear in CMX">
+    If you use your agent but no activity shows up in `cmx stats` or the CMX interface, your agent's harness may not be configured. Run:
+
+    ```bash
+    cmx harness enable
+    ```
+
+    Then restart your coding agent and send a new request. Check `cmx stats` again to confirm activity is being captured.
+
+    ```bash
+    cmx stats
+    ```
+
+    If requests are still not appearing, run `cmx doctor` for a detailed diagnosis of your harness and connection state.
+
+    ```bash
+    cmx doctor
+    ```
+  </Accordion>
+
+  <Accordion title="Gateway Port Conflict">
+    CMX binds its local gateway to port `17322` by default. If that port is already in use, CMX will fail to start.
+
+    First, check whether another CMX instance is already running and stop it:
+
+    ```bash
+    cmx stop
+    ```
+
+    Then try starting again:
+
+    ```bash
+    cmx start
+    ```
+
+    If another process (not CMX) is occupying port `17322`, you can update the port in your configuration file:
+
+    ```toml
+    # cmx.config.toml
+    port = 17323
+    ```
+
+    After changing the port, restart CMX and reconnect your coding agent through the updated CONFIG settings.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Contact support at hello@compressi.us with your OS, CMX version (`cmx --version`), coding agent name, and a description of the issue. Do not send credentials or private conversation content.
+</Note>

@@ -1,0 +1,41 @@
+---
+title: "CMX Release Notes and Changelog"
+sidebarTitle: "Changelog"
+description: "What's new in each CMX release. Stable releases, bug fixes, and feature additions — with links to the full GitHub releases page for complete history."
+---
+
+CMX releases are published as stable builds and nightly builds. Stable builds are recommended for regular use. Every release is published with SHA256 checksums for verification.
+
+## v0.1.38
+
+**Stable · September 15, 2026**
+
+This release restores effective compression for upgraded installations and repairs databases affected by incomplete historical audit migrations.
+
+- Compression starts at 1,000 estimated tokens with a 1,000-token recent tail, five rounds, no cooldown, and a 512-token summary limit.
+- Existing compression settings migrate once with an owner-only rollback copy; provider routing, protected tools, and later user changes remain intact.
+- Startup repairs missing compression request identifiers using a consistent SQLite backup without deleting usage, session, or compression history.
+- Responses JSON/SSE summaries, incomplete terminal events, bounded retries, and internal usage accounting are handled consistently.
+- Nudges retain the real compression result, and decision diagnostics remain content-free.
+- Cache reads remain separate from estimated compressor savings and net totals.
+
+## Full Release History
+
+Every CMX release — including stable builds and nightlies — is listed on the [GitHub releases page](https://github.com/compressius/cmx/releases). Stable builds are also available from the [downloads page](https://compressi.us/downloads).
+
+## Stable vs. Nightly
+
+CMX is published to npm under two dist-tags:
+
+- **`latest`** tracks stable releases and is what you get with a standard `npm install --global @compressius/cmx`.
+- **`nightly`** tracks prerelease builds for users who want early access to new features.
+
+Each package downloads its matching binary for your platform and verifies the SHA-256 checksum before exposing the `cmx` command. You can confirm the version you are running at any time:
+
+```bash
+cmx --version
+```
+
+<Tip>
+  Check release notes before upgrading. Run `cmx upgrade` to see if an update is available without installing it.
+</Tip>

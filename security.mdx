@@ -1,0 +1,57 @@
+---
+title: "CMX Security Model and Privacy Practices"
+sidebarTitle: "Security"
+description: "How CMX keeps your code and credentials safe: local-only gateway, in-memory API keys, aggregate-only telemetry, and signed release artifacts."
+---
+
+CMX is designed so the sensitive parts of your coding session never leave your machine. Here's exactly what stays local, what leaves the device, and how release artifacts are protected.
+
+## Threat Model
+
+CMX sits between a coding agent and a model provider, which makes it a tempting place to intercept sensitive data. We address that by keeping the data plane local and keeping the cloud surface as small as possible. The sections below describe each boundary and the control that governs it.
+
+## Local-Only Gateway
+
+The gateway binds strictly to `127.0.0.1` and rejects any attempt to configure a public listening address. Provider requests are forwarded from your machine directly to the provider you selected — CMX Cloud is never in the request path.
+
+This means the compression logic, your prompts, and your model responses are processed entirely on the local network interface. No third-party infrastructure sits between your machine and your provider.
+
+## API Keys Stay in Memory
+
+Provider API keys are forwarded in process memory for the lifetime of a request. CMX does not write them to disk, does not log them, and does not send them to CMX Cloud.
+
+If you stop CMX or reboot your machine, no key material persists. You may be asked to re-enter credentials through your coding agent the next time a connection is established.
+
+## Device Pairing
+
+Authenticating the gateway with your CMX dashboard uses Ed25519 key pairs. The private key stays on your device — only signed payloads and the public key are ever exchanged. Dashboard sessions are stored in `HttpOnly`, `Secure`, `SameSite=Lax` cookies to reduce exposure to cross-site attacks.
+
+## No Content Logging
+
+CMX does not persist or log your prompts, source code, or model responses. They are sent only to the model provider you configure; CMX Cloud never receives them.
+
+Raw request logging is opt-in, local only, and intended for debugging on your own machine. It is disabled by default. You can check whether it is currently active with:
+
+```bash
+cmx logs status
+```
+
+## Aggregate Telemetry Only
+
+The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. There is no field in the sync schema that can carry content. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
+
+These counters are what populate your account dashboard. They are associated with your authenticated account and signed before transmission.
+
+## Signed Updates and Downloads
+
+Update checks are optional and never install automatically. Running `cmx upgrade` reports whether an update is available without changing anything. To actually install an update, you must explicitly run:
+
+```bash
+cmx upgrade --install
+```
+
+Release artifacts are published alongside a `SHA256SUMS` file so you can verify any download before running it. This applies to all platform builds available from the downloads page and the GitHub releases page.
+
+## Responsible Disclosure
+
+Please report suspected vulnerabilities privately to [hello@compressi.us](mailto:hello@compressi.us) before public disclosure. Avoid including live secrets or user content in your report. We will confirm receipt and work with you on a fix and a coordinated disclosure timeline.

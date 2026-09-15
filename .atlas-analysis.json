@@ -1,0 +1,93 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Compressius Maximus (CMX)",
+  "projectDescription": "CMX is a free local gateway that compresses the context your AI coding agent sends to your model provider, reducing token usage and lowering your AI bill without changing your existing workflow.",
+  "theme": "luma",
+  "primaryColor": "#e14e68",
+  "lightColor": "#8727fc",
+  "darkColor": "#8c51fc",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Setup & Configuration",
+            "pages": [
+              "configuration",
+              "providers/codex",
+              "providers/opencode",
+              "providers/custom-agents"
+            ]
+          },
+          {
+            "group": "Using CMX",
+            "pages": [
+              "how-compression-works",
+              "understanding-savings",
+              "updates"
+            ]
+          },
+          {
+            "group": "CLI Reference",
+            "pages": [
+              "cli-reference"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq",
+              "security",
+              "changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Local context-compression gateway running at 127.0.0.1:17322",
+    "Model-directed summarization with policy-checked approvals",
+    "Protected tool calls (task, skill, write, edit) are never compressed",
+    "Recent context preserved — only eligible older turns are summarized",
+    "Works with Codex, OpenCode, and any OpenAI/Anthropic-compatible agent",
+    "Token savings dashboard (local and web)",
+    "Free to use — no subscriptions or paid plans",
+    "Provider credentials kept in memory, never written to disk",
+    "Signed SHA-256 verified release downloads",
+    "Cross-platform: Linux, macOS, and Windows on x64 and ARM64"
+  ],
+  "publicApiSurface": [
+    "cmx setup",
+    "cmx login",
+    "cmx logout",
+    "cmx start",
+    "cmx stop",
+    "cmx serve",
+    "cmx status",
+    "cmx status --json",
+    "cmx stats",
+    "cmx doctor",
+    "cmx harness enable",
+    "cmx harness disable",
+    "cmx harness list",
+    "cmx harness verify",
+    "cmx sessions purge",
+    "cmx upgrade",
+    "cmx upgrade --install",
+    "cmx logs status",
+    "cmx dashboard",
+    "cmx --version",
+    "cmx --help"
+  ]
+}
