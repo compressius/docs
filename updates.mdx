@@ -1,7 +1,7 @@
 ---
-title: "Update CMX to the Latest Version"
+title: "How to Update CMX to the Latest Stable or Nightly Build"
 sidebarTitle: "Updates"
-description: "How to check for and install CMX updates using the upgrade command or by re-running your original package manager install."
+description: "Check for and install CMX updates using the built-in upgrade command, your package manager, or by switching to the nightly channel for pre-release builds."
 ---
 
 CMX ships updates as stable releases and nightly builds. You can check for and install updates using the built-in `cmx upgrade` command without reinstalling CMX from scratch or repeating account setup. Read the release notes before updating, especially for major version bumps, to catch any breaking changes before they affect an active coding session.
@@ -24,7 +24,7 @@ Once you know an update is available, install it with:
 cmx upgrade --install
 ```
 
-This downloads the verified update and installs it in place. You do not need to uninstall your current version first. After installation, restart CMX with `cmx stop` followed by `cmx start` to run the new version.
+This downloads the update, verifies its SHA-256 checksum against the published release manifest, and installs it in place. You do not need to uninstall your current version first. After installation, restart CMX with `cmx stop` followed by `cmx start` to run the new version.
 
 ## Update via Package Manager
 
@@ -62,7 +62,7 @@ pnpm add --global @compressius/cmx@nightly
 
 ## Release Notes
 
-Full release notes for every stable build are available at [compressi.us/changelog](https://compressi.us/changelog). Every release, including nightlies, is listed on the [GitHub releases page](https://github.com/compressius/cmx/releases).
+Full release notes for every stable build are available on the [changelog](/changelog) page. Every release, including nightlies, is listed on the [GitHub releases page](https://github.com/compressius/cmx/releases).
 
 <Tip>
   Read the release notes before updating, especially for major version bumps. Breaking changes, new configuration keys, and changed defaults are all called out there, so you can prepare before the update affects a live coding session.

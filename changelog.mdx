@@ -1,5 +1,5 @@
 ---
-title: "CMX Release Notes and Changelog"
+title: "CMX Changelog: Release Notes and Version History"
 sidebarTitle: "Changelog"
 description: "What's new in each CMX release. Stable releases, bug fixes, and feature additions — with links to the full GitHub releases page for complete history."
 ---
@@ -14,7 +14,7 @@ This release restores effective compression for upgraded installations and repai
 
 - Compression starts at 1,000 estimated tokens with a 1,000-token recent tail, five rounds, no cooldown, and a 512-token summary limit.
 - Existing compression settings migrate once with an owner-only rollback copy; provider routing, protected tools, and later user changes remain intact.
-- Startup repairs missing compression request identifiers using a consistent SQLite backup without deleting usage, session, or compression history.
+- Startup repairs missing compression request identifiers without deleting usage, session, or compression history.
 - Responses JSON/SSE summaries, incomplete terminal events, bounded retries, and internal usage accounting are handled consistently.
 - Nudges retain the real compression result, and decision diagnostics remain content-free.
 - Cache reads remain separate from estimated compressor savings and net totals.

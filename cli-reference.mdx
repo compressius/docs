@@ -1,5 +1,5 @@
 ---
-title: "CMX CLI Command Reference"
+title: "CMX CLI Reference: All Commands, Flags, and Examples"
 sidebarTitle: "CLI Reference"
 description: "Complete reference for all CMX CLI commands: setup, start/stop, stats, harness, sessions, upgrade, and more. Includes flags and example output."
 ---
@@ -13,12 +13,6 @@ The `cmx` command-line interface provides everything you need to manage your loc
 ### `cmx login`
 
 Sign in and pair this device with your CMX account through the browser.
-
-```bash
-cmx login
-```
-
-**Example:**
 
 ```bash
 cmx login
@@ -40,12 +34,6 @@ cmx setup
   separately.
 </Tip>
 
-**Example:**
-
-```bash
-cmx setup
-```
-
 ---
 
 ### `cmx harness enable`
@@ -56,23 +44,11 @@ Route a detected coding agent through CMX so its traffic passes through the loca
 cmx harness enable
 ```
 
-**Example:**
-
-```bash
-cmx harness enable
-```
-
 ---
 
 ### `cmx serve`
 
 Run CMX in the current terminal as a foreground process. The gateway stays active for as long as the terminal session remains open.
-
-```bash
-cmx serve
-```
-
-**Example:**
 
 ```bash
 cmx serve
@@ -94,12 +70,6 @@ cmx doctor
   sharing it with support.
 </Tip>
 
-**Example:**
-
-```bash
-cmx doctor
-```
-
 ---
 
 ## Start and Stop
@@ -107,12 +77,6 @@ cmx doctor
 ### `cmx`
 
 Open the interactive terminal interface. Use this to manage connections, configure providers, and adjust preferences through a keyboard-driven UI.
-
-```bash
-cmx
-```
-
-**Example:**
 
 ```bash
 cmx
@@ -128,23 +92,11 @@ Start CMX as a background process. The gateway continues running after you close
 cmx start
 ```
 
-**Example:**
-
-```bash
-cmx start
-```
-
 ---
 
 ### `cmx stop`
 
 Stop the background CMX process.
-
-```bash
-cmx stop
-```
-
-**Example:**
 
 ```bash
 cmx stop
@@ -166,13 +118,13 @@ cmx status [flags]
 | -------- | -------------------------------------- |
 | `--json` | Output status in machine-readable JSON |
 
-**Example:**
+**Examples:**
 
 ```bash
+# Human-readable status
 cmx status
-```
 
-```bash
+# Machine-readable JSON output
 cmx status --json
 ```
 
@@ -188,12 +140,6 @@ Show today's token and compression statistics, including tokens handled, estimat
 cmx stats
 ```
 
-**Example:**
-
-```bash
-cmx stats
-```
-
 ---
 
 ### `cmx logs status`
@@ -204,23 +150,11 @@ Check whether opt-in raw logging is currently enabled on this device.
 cmx logs status
 ```
 
-**Example:**
-
-```bash
-cmx logs status
-```
-
 ---
 
 ### `cmx dashboard`
 
 Open the CMX web dashboard in your default browser. The dashboard shows account-level usage history across all your devices.
-
-```bash
-cmx dashboard
-```
-
-**Example:**
 
 ```bash
 cmx dashboard
@@ -238,23 +172,11 @@ List all detected coding agent harnesses on this device.
 cmx harness list
 ```
 
-**Example:**
-
-```bash
-cmx harness list
-```
-
 ---
 
 ### `cmx harness verify`
 
 Verify that saved coding-agent connections are still valid and reachable.
-
-```bash
-cmx harness verify
-```
-
-**Example:**
 
 ```bash
 cmx harness verify
@@ -276,12 +198,6 @@ cmx harness disable
   CMX is removed.
 </Tip>
 
-**Example:**
-
-```bash
-cmx harness disable
-```
-
 ---
 
 ### `cmx sessions purge`
@@ -292,17 +208,11 @@ Delete expired local sessions to free up space and remove stale session data.
 cmx sessions purge
 ```
 
-**Example:**
-
-```bash
-cmx sessions purge
-```
-
 ---
 
 ### `cmx upgrade`
 
-Check whether a newer version of CMX is available.
+Check whether a newer version of CMX is available, or download and install the update immediately.
 
 ```bash
 cmx upgrade [flags]
@@ -310,17 +220,17 @@ cmx upgrade [flags]
 
 **Flags:**
 
-| Flag        | Description                              |
-| ----------- | ---------------------------------------- |
+| Flag        | Description                               |
+| ----------- | ----------------------------------------- |
 | `--install` | Download and install the available update |
 
-**Example:**
+**Examples:**
 
 ```bash
+# Check for an available update
 cmx upgrade
-```
 
-```bash
+# Download and install the update immediately
 cmx upgrade --install
 ```
 
@@ -334,27 +244,27 @@ Sign out of your CMX account and clear all locally stored credentials from this 
 cmx logout
 ```
 
-**Example:**
-
-```bash
-cmx logout
-```
-
 ---
 
 ## Global Flags
 
 These flags are available on every `cmx` command.
 
-| Flag               | Description                          |
-| ------------------ | ------------------------------------ |
-| `--help`, `-h`     | Show help for a command              |
-| `--version`, `-v`  | Print the installed CMX version      |
+| Flag              | Description                     |
+| ----------------- | ------------------------------- |
+| `--help`, `-h`    | Show help for a command         |
+| `--version`, `-v` | Print the installed CMX version |
 
-**Example:**
+**Examples:**
 
 ```bash
+# Print the installed CMX version
 cmx --version
+
+# Show top-level help
+cmx --help
+
+# Show help for a specific command
 cmx harness --help
 ```
 

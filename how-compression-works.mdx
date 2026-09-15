@@ -1,7 +1,7 @@
 ---
-title: "How CMX Compresses AI Context Automatically"
+title: "How CMX Compresses Your AI Agent Context Step by Step"
 sidebarTitle: "How It Works"
-description: "Understand CMX's model-directed compression pipeline: when it triggers, what stays protected, and how policy checks ensure only net-positive compressions are applied."
+description: "How CMX's model-directed pipeline works: when compression triggers, what stays protected, and how policy checks ensure net-positive compressions only."
 ---
 
 CMX sits as a local proxy between your coding agent and your model provider. As a session grows, it uses the model itself to propose summaries of older context — then applies a deterministic policy to decide whether each proposal is safe and economical. If a proposal passes, the summary replaces the older turns in subsequent requests. If it fails or is rejected, the original request passes through to your provider unchanged.

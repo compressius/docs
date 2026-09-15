@@ -1,5 +1,5 @@
 ---
-title: "CMX Security Model and Privacy Practices"
+title: "CMX Security Model: Local Gateway and Privacy Practices"
 sidebarTitle: "Security"
 description: "How CMX keeps your code and credentials safe: local-only gateway, in-memory API keys, aggregate-only telemetry, and signed release artifacts."
 ---
@@ -38,7 +38,7 @@ cmx logs status
 
 ## Aggregate Telemetry Only
 
-The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. There is no field in the sync schema that can carry content. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
+The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. No content — prompts, code, or responses — is included in these counters. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
 
 These counters are what populate your account dashboard. They are associated with your authenticated account and signed before transmission.
 
