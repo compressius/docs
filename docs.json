@@ -18,7 +18,8 @@
             "pages": [
               "introduction",
               "quickstart",
-              "installation"
+              "installation",
+              "uninstall"
             ]
           },
           {
@@ -49,6 +50,7 @@
             "pages": [
               "troubleshooting",
               "faq",
+              "uninstall",
               "security",
               "changelog"
             ]
