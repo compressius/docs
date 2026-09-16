@@ -1,13 +1,16 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "luma",
+  "theme": "almond",
   "name": "Compressius Maximus",
   "colors": {
     "primary": "#e14e68",
     "light": "#8727fc",
     "dark": "#8c51fc"
   },
-  "favicon": "https://media.brand.dev/9f662c89-af95-4704-a6e5-0650b89f6b9f.svg",
+  "favicon": {
+    "light": "/images/ChatGPTImageSep15,2026,10_07_23PM.png",
+    "dark": "/images/ChatGPTImageSep15,2026,10_07_23PM.png"
+  },
   "navigation": {
     "tabs": [
       {
