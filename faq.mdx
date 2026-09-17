@@ -39,11 +39,15 @@ Common questions about CMX answered. If you don't find what you need here, check
 
     - **On your device:** session state, compression decisions, aggregate counters, and provider credentials — kept in memory and never written to disk.
     - **Your configured model provider:** prompts, context, and responses are sent as part of normal operation. Compression changes what is sent, not where it goes.
-    - **CMX services:** signed aggregate usage counters for authenticated accounts only — never prompts, responses, code, or session content.
+    - **CMX services:** aggregate usage counters only. Signed-in installations send signed counters associated with your account; unsigned local installations send anonymous aggregate counters that are isolated from any account and never appear in a dashboard. Neither path includes prompts, responses, code, or session content.
   </Accordion>
 
   <Accordion title="Do I need an account?">
-    Yes. CMX requires an account, and there is no guest mode. Signing in pairs your device with the dashboard. Creating an account is free.
+    No. CMX runs locally without a CMX account. On a fresh install, `cmx setup` offers **Continue locally** to start the gateway without signing in. Signing in is optional and pairs your device with the web dashboard for detailed account-linked usage statistics. You can add or remove sign-in later without losing your local configuration.
+  </Accordion>
+
+  <Accordion title="What does signing in unlock?">
+    Signing in with a free CMX account pairs the installation with the web dashboard. It unlocks detailed usage statistics viewable across all your devices. Unsigned installations still send anonymous aggregate counters that are isolated from any account and never appear in a dashboard.
   </Accordion>
 
   <Accordion title="Will CMX always reduce my API bill?">
@@ -51,7 +55,7 @@ Common questions about CMX answered. If you don't find what you need here, check
   </Accordion>
 
   <Accordion title="Does CMX work without an internet connection?">
-    CMX compression works locally without internet access. Account sync, dashboard access, and update checks require an internet connection. If CMX Cloud is unavailable, local compression continues working — your coding sessions are not interrupted.
+    CMX compression works locally without internet access, and local use does not require a CMX account. Dashboard access, account sync, anonymous metric delivery, and update checks require an internet connection. If CMX Cloud is unavailable, local compression continues working — your coding sessions are not interrupted.
   </Accordion>
 
   <Accordion title="Can I see what was compressed?">
