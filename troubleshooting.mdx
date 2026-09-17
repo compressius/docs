@@ -47,9 +47,9 @@ If CMX isn't starting, your agent isn't routing through it, or compression isn't
 
     Keep in mind:
 
-    - Short conversations may show little or no savings — CMX only compresses once a session crosses the configured minimum context size.
+    - Very short exchanges may show little or no savings. CMX only compresses once a session crosses the configured minimum context size.
     - Try a longer coding session where context accumulates over several turns.
-    - Check that the `min_context_tokens` threshold in your `cmx.config.toml` is set to a reasonable value for your typical session length.
+    - Check that the `min_context_tokens` threshold in your `cmx.config.toml` is set to a reasonable value for your typical session length. The default (`1000`) starts compression aggressively; raise it if you want CMX to leave more short sessions alone.
 
     ```toml
     # cmx.config.toml

@@ -22,7 +22,7 @@ Every request your coding agent sends travels through the following sequence bef
     Your coding agent sends its request to `127.0.0.1:17322`, the local CMX gateway address. From your agent's perspective, this looks like a normal API call to your provider.
   </Step>
   <Step title="CMX checks the session size">
-    CMX inspects the current session size. If the context has not yet crossed the configured `min_context_tokens` threshold (default: 32,000 tokens), the request passes through untouched and compression is skipped entirely.
+    CMX inspects the current session size. If the context has not yet crossed the configured `min_context_tokens` threshold (default: 1,000 tokens), the request passes through untouched and compression is skipped entirely.
   </Step>
   <Step title="CMX asks the model to summarize">
     When the session is large enough, CMX sends a separate request asking the model to produce a factual summary of eligible older context turns — those not protected by policy and not part of the preserved recent tail.
@@ -45,18 +45,20 @@ CMX never modifies the following, regardless of session length or compression se
 | Protected element | Why it is excluded |
 |---|---|
 | `task`, `skill`, `write`, and `edit` tool calls and their results | These represent irreversible or high-stakes actions. Summarizing them could silently drop critical intent or output. |
-| Recent context (last `preserve_tail_tokens` tokens, default: 12,000) | Your most recent work is always kept verbatim so the model retains full, accurate context for the current task. |
+| Recent context (last `preserve_tail_tokens` tokens, default: 1,000) | Your most recent work is always kept verbatim so the model retains full, accurate context for the current task. |
 | System instructions | System prompts define the agent's behaviour and are outside the scope of session summarization. |
 | Opaque content, such as reasoning blocks | CMX cannot inspect or summarize content it cannot reliably parse, so such content is always preserved intact. |
 | Complete tool exchanges | Tool call and result pairs are kept together and untouched to avoid breaking the logical pairing the model depends on. |
 
 ## When Compression Starts
 
-Compression only activates once a session exceeds `min_context_tokens` (default: 32,000 tokens). Short conversations — a few quick questions, a single file edit — will not compress at all. This is intentional: the overhead of a compression request is not worth it for small contexts.
+Compression activates once a session exceeds `min_context_tokens` (default: 1,000 tokens). Very short exchanges — a single one-line question with no prior context — still pass through untouched. Every other eligible request is inspected each turn so summarization can begin as soon as older history becomes worth compressing.
 
-The longer a session runs, the more repetitive history it accumulates: earlier drafts, resolved errors, superseded reasoning. That's exactly where CMX delivers the most value. A single-day refactoring session or a long debugging run will see more compression activity than a brief back-and-forth exchange.
+For each eligible request, CMX walks the message history and splits it into "islands" of contiguous eligible turns, skipping protected tool exchanges, system instructions, and the preserved recent tail. Every eligible island is a candidate for the same round of summarization. A single request can run up to `max_rounds_per_request` internal rounds (default: `8`, accepted range `1`–`8`), stopping earlier if the request already fits or no eligible span remains.
 
-You can adjust `min_context_tokens` in your `cmx.config.toml` if you want compression to activate earlier or later in a session.
+If a proposed summary is rejected for one island, that island stays eligible for a later round or a later request instead of being discarded. The longer a session runs, the more repetitive history it accumulates: earlier drafts, resolved errors, superseded reasoning. That's exactly where CMX delivers the most value.
+
+You can adjust `min_context_tokens`, `preserve_tail_tokens`, `safety_margin_tokens`, and `max_rounds_per_request` in your `cmx.config.toml` if you want compression to activate earlier, later, or more aggressively in a session.
 
 ## Model-Directed Summaries
 
@@ -64,7 +66,9 @@ Rather than applying heuristic rules about what to drop, CMX asks the model to p
 
 CMX's role in this exchange is as policy enforcer, not guesser. It defines the rules — what is protected, what minimum saving is required, what must be preserved — and the model does the compression work within those boundaries. If the model's proposal does not meet the policy criteria, CMX discards it and forwards the original.
 
-Summaries are cached in memory on your machine, scoped to the upstream endpoint, model, and source content. The same compressible span will not trigger a redundant summarization request if a cached result already covers it.
+When multiple eligible islands exist in the same request, CMX summarizes all of them in a single internal call. The model returns one replacement summary per island. Each replacement is sized to roughly one eighth of its source span, so even modest islands still clear the safety margin instead of being skipped.
+
+Summaries are cached in two places on your machine: an in-memory cache in the running gateway for fast reuse within a session, and the local CMX store for reuse across restarts. Both caches are scoped to the upstream endpoint, model, credential scope, and source content. Cached islands are applied for free on later requests and do not count against the per-request spend limit.
 
 ## Local by Design
 
