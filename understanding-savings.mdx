@@ -51,7 +51,7 @@ When CMX has already produced a summary for a given context span, it reuses that
 
 Not every session will produce the same savings. Several factors influence how much compression CMX can apply:
 
-- **Session length**: Compression only activates above `min_context_tokens` (default: 32,000 tokens). The longer a session runs, the more repetitive context accumulates and the more CMX can summarize away.
+- **Session length**: Compression only activates above `min_context_tokens` (default: 1,000 tokens). The longer a session runs, the more repetitive context accumulates and the more CMX can summarize away.
 - **Workload type**: Repetitive back-and-forth exchanges — iterating on the same file, debugging the same error — compress more effectively than a series of isolated, unrelated questions where each turn introduces entirely new context.
 - **Provider caching**: If your provider caches prompt prefixes (as some do for long shared prefixes), compression savings may partially overlap with the savings your provider already gives you from cache hits. The two mechanisms are not additive in all cases.
 - **Compression overhead**: Every summarization request costs tokens. CMX's policy requires the estimated saving to exceed that overhead before applying a summary, so sessions that are just above the minimum threshold may see modest or no compression.

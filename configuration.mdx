@@ -38,9 +38,11 @@ CMX stores its gateway configuration in a local `cmx.config.toml` file. Most set
 ```toml
 # CMX gateway configuration
 port = 17322
-min_context_tokens = 32000
-preserve_tail_tokens = 12000
-protected_tools = ["task", "skill", "write", "edit"]
+min_context_tokens = 1000
+preserve_tail_tokens = 1000
+safety_margin_tokens = 128
+max_rounds_per_request = 8
+protected_tools = ["task", "skill", "todowrite", "todoread", "write", "edit", "apply_patch"]
 client = ""
 provider = ""
 ```
@@ -48,11 +50,17 @@ provider = ""
 Each key controls a specific aspect of gateway behavior:
 
 - **`port`** — the local port CMX listens on. Default is `17322`. Your coding agent must point to this port when routing through CMX.
-- **`min_context_tokens`** — the session must exceed this token count before CMX considers compression. Default is `32000`. Short conversations below this threshold are passed through unchanged.
-- **`preserve_tail_tokens`** — the most recent portion of context, up to this token count, is always kept intact and never compressed. Default is `12000`.
-- **`protected_tools`** — tool calls matching these names, and their results, are never compressed. Defaults cover `task`, `skill`, `write`, and `edit`. Add any other tool names you want to protect.
+- **`min_context_tokens`** — the session must exceed this token count before CMX considers compression. Default is `1000`. Short conversations below this threshold are passed through unchanged. The minimum accepted value is `1000`.
+- **`preserve_tail_tokens`** — the most recent portion of context, up to this token count, is always kept intact and never compressed. Default is `1000`. The minimum accepted value is `1000`.
+- **`safety_margin_tokens`** — an eligible span is only compressed when the estimated saving after summary overhead exceeds this many tokens. Default is `128`. Raise it if you want CMX to be more conservative about small wins.
+- **`max_rounds_per_request`** — the maximum number of internal compression rounds CMX will run for a single request. Default is `8`. Accepted range is `1`–`8`. Each round compresses one or more eligible spans until the request fits or no further eligible spans remain.
+- **`protected_tools`** — tool calls matching these names, and their results, are never compressed. Defaults cover `task`, `skill`, `todowrite`, `todoread`, `write`, `edit`, and `apply_patch`. Add any other tool names you want to protect.
 - **`client`** — the coding agent currently connected to CMX. Set automatically when you connect an agent through CONFIG.
 - **`provider`** — the model provider used for the connected agent. Set automatically through CONFIG.
+
+<Note>
+  CMX updates configurations created with older defaults on load. If your `cmx.config.toml` still carries pre-upgrade values for `min_context_tokens`, `preserve_tail_tokens`, `safety_margin_tokens`, or `max_rounds_per_request`, CMX rewrites them to the current defaults so newer sessions compress aggressively. Your original file is preserved as `config.json.pre-policy-1` in the same directory for rollback. Explicit values you set yourself are left untouched.
+</Note>
 
 <Note>
   Changes to `cmx.config.toml` take effect after restarting CMX. Run `cmx stop` followed by `cmx start` to apply updated settings.
