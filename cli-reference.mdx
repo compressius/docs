@@ -10,29 +10,27 @@ The `cmx` command-line interface provides everything you need to manage your loc
 
 ## Get Started
 
-### `cmx login`
-
-Sign in and pair this device with your CMX account through the browser.
-
-```bash
-cmx login
-```
-
----
-
 ### `cmx setup`
 
-Sign in and connect detected coding agents. This is the recommended command to run the first time you install CMX — it handles browser sign-in, gateway startup, and agent connection in a single guided flow.
+Start the local gateway and connect detected coding agents. This is the recommended command to run the first time you install CMX. On a fresh install it opens the terminal interface and offers **Sign in** and **Continue locally**; choose **Continue locally** to run CMX without a CMX account, or **Sign in** to also pair this device with the web dashboard. Once a choice is saved, subsequent runs start the gateway and connect coding agents without asking again.
 
 ```bash
 cmx setup
 ```
 
 <Tip>
-  Run `cmx setup` immediately after installation. It combines login, gateway
-  start, and coding agent connection so you don't have to run each step
-  separately.
+  Run `cmx setup` immediately after installation. It handles gateway startup and coding agent connection in a single guided flow, whether or not you sign in.
 </Tip>
+
+---
+
+### `cmx login`
+
+Pair this device with your CMX account through the browser. Sign-in is optional. It unlocks the web dashboard and detailed account-linked usage statistics but is not required for local gateway use. You can run `cmx login` at any time, including after starting CMX locally, without losing your local configuration.
+
+```bash
+cmx login
+```
 
 ---
 
@@ -154,7 +152,7 @@ cmx logs status
 
 ### `cmx dashboard`
 
-Open the CMX web dashboard in your default browser. The dashboard shows account-level usage history across all your devices.
+Open the CMX web dashboard in your default browser. The dashboard shows account-level usage history across all your devices and requires a signed-in CMX account. If you are running CMX locally without signing in, run `cmx login` first.
 
 ```bash
 cmx dashboard
@@ -238,7 +236,7 @@ cmx upgrade --install
 
 ### `cmx logout`
 
-Sign out of your CMX account and clear all locally stored credentials from this device.
+Sign out of your CMX account and clear all locally stored credentials from this device. Your local configuration and the ability to keep using CMX without an account are preserved, so the gateway continues to work after sign-out.
 
 ```bash
 cmx logout

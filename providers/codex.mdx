@@ -14,18 +14,18 @@ keywords:
 Connect Codex to CMX so every request from Codex passes through the local gateway. CMX compresses repeated context in the background, reducing the tokens sent to your model provider on each turn — without changing how you use Codex.
 
 <Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. Codex must already be installed with a working model provider sign-in. CMX does not replace your provider account; you continue signing in through Codex as usual.
+  **Prerequisites:** CMX must be installed and set up on your device (a CMX account is optional; **Continue locally** is enough). Codex must already be installed with a working model provider sign-in. CMX does not replace your provider account; you continue signing in through Codex as usual.
 </Note>
 
 <Steps>
   <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+    Run the guided setup command to start the local gateway and detect your coding agents:
 
     ```bash
     cmx setup
     ```
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+    On a fresh install, choose **Continue locally** to run without a CMX account, or **Sign in** to also pair with the web dashboard. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
   </Step>
 
   <Step title="Connect Codex">

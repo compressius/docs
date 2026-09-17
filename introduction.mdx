@@ -45,11 +45,11 @@ If you run long coding sessions where context grows across many turns, CMX will 
 
 CMX is local-first by design. The gateway binds exclusively to `127.0.0.1:17322` — it never listens on a network-accessible interface. Your prompts, source code, and model responses travel only between your machine and your configured provider. CMX servers never receive your conversation content.
 
-Provider credentials are held in memory for the lifetime of the gateway process and are never written to disk. The only data that leaves your device is a signed aggregate counter sent to your CMX account — a total of tokens handled and saved, with no attached content.
+Provider credentials are held in memory for the lifetime of the gateway process and are never written to disk. CMX runs fully locally without a CMX account; in that mode only anonymous aggregate counters are sent, and they never appear in a dashboard. If you sign in, the same aggregate counters — totals of tokens handled and saved, with no attached content — are associated with your account and shown on the web dashboard.
 
 <CardGroup cols={2}>
   <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Install CMX, sign in, and connect your coding agent in four steps.
+    Install CMX and connect your coding agent in four steps. No CMX account required.
   </Card>
   <Card title="How Compression Works" icon="arrows-to-circle" href="/how-compression-works">
     Understand the policy checks and model-directed summarization behind CMX.

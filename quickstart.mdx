@@ -1,7 +1,7 @@
 ---
 title: "CMX Quick Start: Install, Connect, and Save Tokens"
 sidebarTitle: "Quick Start"
-description: "Install CMX, sign in with your free account, connect your AI coding agent, and verify that requests are flowing — all in under a minute."
+description: "Install CMX, run setup, connect your AI coding agent, and verify that requests are flowing — all in under a minute. No account required."
 keywords:
   - "CMX quickstart"
   - "install CMX"
@@ -12,7 +12,7 @@ keywords:
   - "local gateway setup"
 ---
 
-This page walks you through installing CMX, signing in with your free account, connecting your coding agent, and verifying that requests are flowing through the gateway. You'll be up and running in under a minute.
+This page walks you through installing CMX, running setup, connecting your coding agent, and verifying that requests are flowing through the gateway. CMX runs locally without a CMX account. Signing in is optional and enables the web dashboard.
 
 <Steps>
   <Step title="Install CMX">
@@ -42,13 +42,15 @@ This page walks you through installing CMX, signing in with your free account, c
   </Step>
 
   <Step title="Complete Setup">
-    Run the setup command to sign in and start the local gateway:
+    Run the setup command to start the local gateway:
 
     ```bash
     cmx setup
     ```
 
-    CMX opens a browser window for account sign-in. Complete the sign-in flow, then return to the terminal. CMX will detect any supported coding agents on your machine and prompt you to choose one to connect.
+    On a fresh install, the terminal interface offers **Sign in** and **Continue locally**. Choose **Continue locally** to start the gateway without a CMX account. CMX will detect any supported coding agents on your machine and prompt you to choose one to connect.
+
+    To pair the installation with a free CMX account for the web dashboard and detailed usage statistics, choose **Sign in** or run `cmx login` at any time. Sign-in is optional and can be added or removed later without losing your local setup.
   </Step>
 
   <Step title="Connect Your Agent">

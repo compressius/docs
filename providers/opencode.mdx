@@ -13,18 +13,18 @@ keywords:
 Connect OpenCode to CMX so requests from OpenCode pass through the local gateway. CMX compresses eligible context in the background, reducing your provider token usage across longer coding sessions — without requiring any changes to how you use OpenCode.
 
 <Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. OpenCode must already be installed with a configured model provider. CMX does not replace your provider account; you continue managing your provider sign-in through OpenCode as usual.
+  **Prerequisites:** CMX must be installed and set up on your device (a CMX account is optional; **Continue locally** is enough). OpenCode must already be installed with a configured model provider. CMX does not replace your provider account; you continue managing your provider sign-in through OpenCode as usual.
 </Note>
 
 <Steps>
   <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+    Run the guided setup command to start the local gateway and detect your coding agents:
 
     ```bash
     cmx setup
     ```
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+    On a fresh install, choose **Continue locally** to run without a CMX account, or **Sign in** to also pair with the web dashboard. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
   </Step>
 
   <Step title="Connect OpenCode">

@@ -31,7 +31,7 @@ If you stop CMX or reboot your machine, no key material persists. You may be ask
 
 ## Device Pairing
 
-Authenticating the gateway with your CMX dashboard uses Ed25519 key pairs. The private key stays on your device — only signed payloads and the public key are ever exchanged. Dashboard sessions are stored in `HttpOnly`, `Secure`, `SameSite=Lax` cookies to reduce exposure to cross-site attacks.
+Device pairing applies only when you sign in with a CMX account. Local use does not pair or authenticate the device with CMX Cloud. When you do sign in, authenticating the gateway with your CMX dashboard uses Ed25519 key pairs. The private key stays on your device — only signed payloads and the public key are ever exchanged. Dashboard sessions are stored in `HttpOnly`, `Secure`, `SameSite=Lax` cookies to reduce exposure to cross-site attacks.
 
 ## No Content Logging
 
@@ -45,9 +45,9 @@ cmx logs status
 
 ## Aggregate Telemetry Only
 
-The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. No content — prompts, code, or responses — is included in these counters. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
+The only data that reaches CMX Cloud is an allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. No content — prompts, code, or responses — is included in these counters. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
 
-These counters are what populate your account dashboard. They are associated with your authenticated account and signed before transmission.
+When you sign in, these counters are signed, associated with your authenticated account, and populate your web dashboard. When you run CMX locally without signing in, the same counters are sent as anonymous aggregates that are isolated from any account and never appear in a dashboard. Delivery is best effort in both modes: if it fails or is unavailable, local compression and proxy traffic continue uninterrupted.
 
 ## Signed Updates and Downloads
 
