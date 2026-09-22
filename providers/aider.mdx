@@ -1,0 +1,94 @@
+---
+title: "Connect Aider to CMX for Automatic Context Compression"
+sidebarTitle: "Aider"
+description: "Step-by-step guide to routing Aider through the CMX local gateway so your OpenAI-compatible coding sessions benefit from automatic context compression."
+keywords:
+  - "Aider CMX"
+  - "Aider proxy"
+  - "openai-api-base"
+  - "reduce Aider token cost"
+  - "cmx aider setup"
+---
+
+Connect Aider to CMX so requests from Aider pass through the local gateway. CMX compresses eligible context in the background, reducing the tokens sent to your provider on longer editing sessions. You keep signing in through Aider with your own API key.
+
+<Note>
+  **Prerequisites:** CMX must be installed and signed in on your device. Aider must already be installed with a working API key (for example, `OPENAI_API_KEY`) set in your environment.
+</Note>
+
+<Steps>
+  <Step title="Set Up CMX">
+    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+
+    ```bash
+    cmx setup
+    ```
+
+    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+  </Step>
+
+  <Step title="Connect Aider">
+    Enable the Aider harness so CMX patches its configuration file:
+
+    ```bash
+    cmx harness enable aider
+    ```
+
+    CMX updates `~/.aider.conf.yml` to set:
+
+    ```yaml
+    openai-api-base: http://127.0.0.1:17322/route/openai/v1
+    ```
+
+    A `.cmx-backup` of the original file is written next to it so the change can be rolled back cleanly. If `~/.aider.conf.yml` does not exist, CMX creates it with just this key.
+
+    Restart Aider so it picks up the new base URL.
+  </Step>
+
+  <Step title="Verify the Connection">
+    Confirm that Aider is routing through CMX correctly:
+
+    ```bash
+    cmx harness verify
+    ```
+
+    Run Aider on a repository and send a request as you normally would. Then check CMX for activity:
+
+    ```bash
+    cmx stats
+    ```
+
+    New requests should appear in the stats output. If you see activity, the connection is working.
+  </Step>
+</Steps>
+
+<Note>
+  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
+</Note>
+
+## Disconnecting
+
+To restore Aider's original configuration and remove CMX from its request path:
+
+```bash
+cmx harness disable aider
+```
+
+CMX reads the `.cmx-backup` file it wrote during enable and restores the previous `openai-api-base` value (or removes the line entirely if it wasn't set before).
+
+## Troubleshooting
+
+If requests from Aider are not appearing in `cmx stats` after a coding session:
+
+1. **Restart Aider** — the new `openai-api-base` only takes effect after a full restart.
+2. **Check that the harness is enabled** — run `cmx harness list` and confirm Aider shows `enabled (routing through CMX)`.
+3. **Confirm your API key is still set** — CMX forwards your key to the provider unchanged, so Aider needs the same environment variable it used before.
+4. **Run the diagnostics command:**
+
+   ```bash
+   cmx doctor
+   ```
+
+For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
+
+Looking for a different integration? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) if your tool is not on the list of supported harnesses.

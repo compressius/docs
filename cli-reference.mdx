@@ -38,11 +38,30 @@ cmx setup
 
 ### `cmx harness enable`
 
-Route a detected coding agent through CMX so its traffic passes through the local compression gateway.
+Route detected coding agents through CMX so their traffic passes through the local compression gateway. With no argument, CMX enables every detected harness. Pass a harness name to enable just one.
 
 ```bash
-cmx harness enable
+cmx harness enable [harness]
 ```
+
+**Supported harness names:** `codex`, `opencode`, `claude`, `aider`, `cline`, `antigravity` (alias: `agy`).
+
+**Examples:**
+
+```bash
+# Enable every detected harness
+cmx harness enable
+
+# Enable just Claude Code
+cmx harness enable claude
+
+# Enable just Antigravity (agy is accepted as an alias)
+cmx harness enable antigravity
+```
+
+<Tip>
+  Each harness's original config file is preserved as a `.cmx-backup` next to it so `cmx harness disable` can restore it cleanly.
+</Tip>
 
 ---
 
@@ -166,11 +185,13 @@ cmx dashboard
 
 ### `cmx harness list`
 
-List all detected coding agent harnesses on this device.
+List all detected coding agent harnesses on this device, along with the config file each one uses and whether CMX is currently routing its traffic.
 
 ```bash
 cmx harness list
 ```
+
+CMX detects Codex, OpenCode, Claude Code, Aider, Cline, and Antigravity (`agy`). Each entry is marked either `enabled (routing through CMX)` or `disabled`.
 
 ---
 
@@ -186,11 +207,25 @@ cmx harness verify
 
 ### `cmx harness disable`
 
-Restore the original harness configuration for all connected coding agents, removing CMX from their request path.
+Restore the original harness configuration and remove CMX from the request path. With no argument, CMX disables every connected harness. Pass a harness name to disable just one.
 
 ```bash
-cmx harness disable
+cmx harness disable [harness]
 ```
+
+**Supported harness names:** `codex`, `opencode`, `claude`, `aider`, `cline`, `antigravity` (alias: `agy`).
+
+**Examples:**
+
+```bash
+# Restore every connected harness
+cmx harness disable
+
+# Restore just Aider
+cmx harness disable aider
+```
+
+CMX restores each config file from the `.cmx-backup` written when the harness was enabled. For Antigravity, the installed `agy` wrapper is removed so the real binary runs directly again.
 
 <Tip>
   Run `cmx harness disable` before uninstalling CMX. This restores your coding

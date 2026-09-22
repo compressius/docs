@@ -31,6 +31,10 @@
               "configuration",
               "providers/codex",
               "providers/opencode",
+              "providers/claude-code",
+              "providers/aider",
+              "providers/cline",
+              "providers/antigravity",
               "providers/custom-agents"
             ]
           },

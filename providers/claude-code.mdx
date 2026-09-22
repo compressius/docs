@@ -1,0 +1,87 @@
+---
+title: "Connect Claude Code to CMX for Automatic Context Compression"
+sidebarTitle: "Claude Code"
+description: "Step-by-step guide to routing Claude Code through the CMX local gateway so your Anthropic coding sessions benefit from automatic context compression."
+keywords:
+  - "Claude Code CMX"
+  - "Claude Code proxy"
+  - "Anthropic base URL"
+  - "reduce Claude token cost"
+  - "cmx claude setup"
+---
+
+Connect Claude Code to CMX so requests from Claude Code pass through the local gateway. CMX compresses eligible context in the background, reducing the tokens sent to Anthropic across longer coding sessions. You keep signing in through Claude Code as usual.
+
+<Note>
+  **Prerequisites:** CMX must be installed and signed in on your device. Claude Code must already be installed and signed in with your Anthropic account. CMX does not replace your Anthropic account or API key.
+</Note>
+
+<Steps>
+  <Step title="Set Up CMX">
+    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+
+    ```bash
+    cmx setup
+    ```
+
+    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+  </Step>
+
+  <Step title="Connect Claude Code">
+    Enable the Claude Code harness so CMX patches its settings file:
+
+    ```bash
+    cmx harness enable claude
+    ```
+
+    CMX updates `~/.claude/settings.json` (or `~/.claude.json`, whichever exists) to set `ANTHROPIC_BASE_URL` to `http://127.0.0.1:17322/route/anthropic`. A `.cmx-backup` of the original file is written next to it so the change can be rolled back cleanly.
+
+    Restart Claude Code so it picks up the new environment variable.
+  </Step>
+
+  <Step title="Verify the Connection">
+    Confirm that Claude Code is routing through CMX correctly:
+
+    ```bash
+    cmx harness verify
+    ```
+
+    Send a request from Claude Code as you normally would. Then check CMX for activity:
+
+    ```bash
+    cmx stats
+    ```
+
+    New requests should appear in the stats output. If you see activity, the connection is working.
+  </Step>
+</Steps>
+
+<Note>
+  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
+</Note>
+
+## Disconnecting
+
+To restore Claude Code's original configuration and remove CMX from its request path:
+
+```bash
+cmx harness disable claude
+```
+
+CMX reads the `.cmx-backup` file it wrote during enable and restores the previous `ANTHROPIC_BASE_URL` value (or removes it entirely if it wasn't set before).
+
+## Troubleshooting
+
+If requests from Claude Code are not appearing in `cmx stats` after a coding session:
+
+1. **Restart Claude Code** — the new `ANTHROPIC_BASE_URL` only takes effect after a full restart.
+2. **Check that the harness is enabled** — run `cmx harness list` and confirm Claude Code shows `enabled (routing through CMX)`.
+3. **Run the diagnostics command:**
+
+   ```bash
+   cmx doctor
+   ```
+
+For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
+
+Looking for a different integration? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) if your tool is not on the list of supported harnesses.
