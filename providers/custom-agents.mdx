@@ -1,18 +1,20 @@
 ---
-title: "Connect Any OpenAI or Anthropic Agent to CMX Gateway"
+title: "Connect Any OpenAI, Anthropic, or Gemini Agent to CMX Gateway"
 sidebarTitle: "Custom Agents"
-description: "Use CMX with any AI coding tool that accepts a custom API base URL and speaks the OpenAI or Anthropic API protocol. Includes base URL reference."
+description: "Use CMX with any AI coding tool that accepts a custom API base URL. Point it at http://127.0.0.1:17322/route/<provider> to reach OpenAI, Anthropic, Gemini, Ollama, and more."
 keywords:
   - "OpenAI compatible gateway"
   - "Anthropic compatible gateway"
+  - "Gemini compatible gateway"
   - "custom AI agent"
   - "AI proxy base URL"
   - "Chat Completions proxy"
   - "Anthropic Messages proxy"
+  - "Gemini generateContent proxy"
   - "cmx custom agent"
 ---
 
-CMX works with any coding agent or tool that accepts a custom API base URL and speaks OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages. Codex and OpenCode are verified integrations with dedicated setup guides. Other tools are not individually verified, but many work with CMX without any changes beyond pointing them at the local gateway.
+CMX works with any coding agent or tool that accepts a custom API base URL and speaks OpenAI Chat Completions, OpenAI Responses, Anthropic Messages, or Google Gemini Content. Codex and OpenCode are verified integrations with dedicated setup guides. Other tools are not individually verified, but many work with CMX without any changes beyond pointing them at the local gateway.
 
 ## Requirements
 
@@ -28,22 +30,90 @@ Make sure CMX is running (`cmx start` or `cmx serve`) before sending requests th
 
 ## Connecting via Custom Base URL
 
-Point your tool's API base URL at the appropriate CMX endpoint for the protocol it speaks:
+Point your tool's API base URL at a path-based route that names the upstream provider you want CMX to forward to:
 
-- **OpenAI-compatible tools** — use the `/openai` path
-- **Anthropic-compatible tools** — use the `/anthropic` path
-
-```bash
-# OpenAI-compatible tools
-OPENAI_BASE_URL=http://127.0.0.1:17322/openai
-
-# Anthropic-compatible tools
-ANTHROPIC_BASE_URL=http://127.0.0.1:17322/anthropic
+```text
+http://127.0.0.1:17322/route/<provider>/...
 ```
 
-Set these environment variables before launching your tool, or enter the URLs directly in your tool's settings. Your API keys are passed through to your provider unchanged — CMX never stores them.
+The `<provider>` segment picks the upstream (for example `openai`, `anthropic`, `gemini`, `ollama`). The rest of the path is forwarded to that provider. CMX also accepts `/provider/<provider>/...` as an alias for `/route/<provider>/...`.
 
-Once your tool is pointed at CMX, all requests will flow through the local gateway. CMX applies compression when sessions grow large enough and policy checks pass, then forwards the request to your configured provider.
+If your agent only lets you set the host (not a path prefix), you can pass the provider as a query parameter instead:
+
+```text
+http://127.0.0.1:17322/v1?cmx_provider=<provider>
+```
+
+Or send it as a request header:
+
+```text
+X-CMX-Provider: <provider>
+```
+
+Your API keys are passed through to the upstream provider unchanged. CMX never stores them.
+
+### Common Examples
+
+```bash
+# OpenAI (Chat Completions or Responses)
+OPENAI_BASE_URL=http://127.0.0.1:17322/route/openai/v1
+
+# Anthropic (Messages)
+ANTHROPIC_BASE_URL=http://127.0.0.1:17322/route/anthropic
+
+# Google Gemini (native REST / SSE)
+GEMINI_BASE_URL=http://127.0.0.1:17322/route/gemini
+
+# Ollama (local models)
+OLLAMA_HOST=http://127.0.0.1:17322/route/ollama
+
+# xAI (Grok)
+XAI_BASE_URL=http://127.0.0.1:17322/route/xai
+```
+
+Set these environment variables before launching your tool, or enter the URLs directly in your tool's settings. Once your tool is pointed at CMX, all requests flow through the local gateway. CMX applies compression when sessions grow large enough and policy checks pass, then forwards the request to the chosen provider.
+
+## Supported Providers
+
+CMX ships with built-in configuration for the following upstream providers. Use the name in the `<provider>` slot of your base URL.
+
+| Provider name | Upstream | Protocols |
+|---|---|---|
+| `openai` | `https://api.openai.com` | OpenAI Chat, OpenAI Responses |
+| `anthropic` | `https://api.anthropic.com` | Anthropic Messages |
+| `gemini` | `https://generativelanguage.googleapis.com/v1beta/openai` | Gemini Content (native REST/SSE), OpenAI Chat |
+| `deepseek` | `https://api.deepseek.com` | OpenAI Chat |
+| `groq` | `https://api.groq.com/openai` | OpenAI Chat |
+| `mistral` | `https://api.mistral.ai` | OpenAI Chat |
+| `togetherai` | `https://api.together.xyz` | OpenAI Chat |
+| `perplexity` | `https://api.perplexity.ai` | OpenAI Chat |
+| `xai` | `https://api.x.ai` | OpenAI Chat |
+| `ollama` | `http://127.0.0.1:11434/v1` | OpenAI Chat |
+| `commandcode` | `https://api.commandcode.ai/provider/v1` | OpenAI Chat, OpenAI Responses, Anthropic Messages |
+| `opencode` | `https://opencode.ai/zen/v1` | OpenAI Chat, OpenAI Responses |
+| `opencode-go` | `https://opencode.ai/zen/go/v1` | OpenAI Chat, OpenAI Responses |
+
+## Native Gemini Support
+
+CMX has a native Google Gemini adapter. If your tool speaks the Gemini REST format directly (`/v1beta/models/{model}:generateContent` and `:streamGenerateContent`), point it at `http://127.0.0.1:17322/route/gemini` and CMX will:
+
+- Forward `generateContent` and `streamGenerateContent` calls, including SSE streams with `alt=sse`.
+- Extract token usage from `usageMetadata` (`promptTokenCount`, `candidatesTokenCount`, `cachedContentTokenCount`).
+- Preserve `functionCall` / `functionResponse` parts, `systemInstruction`, and `thought` parts.
+
+If your tool speaks Gemini's OpenAI-compatible endpoint instead, use the same `/route/gemini` base URL — CMX will match the dialect from the request path.
+
+```bash
+# Native Gemini
+GEMINI_BASE_URL=http://127.0.0.1:17322/route/gemini
+
+# Gemini via OpenAI-compatible endpoint
+OPENAI_BASE_URL=http://127.0.0.1:17322/route/gemini/v1
+```
+
+## Endpoint Path Normalization
+
+If your tool sends a bare path like `/chat/completions` or `/responses` without a `/v1` prefix, CMX prepends `/v1` before forwarding to the upstream. That means `http://127.0.0.1:17322/route/openai/chat/completions` and `http://127.0.0.1:17322/route/openai/v1/chat/completions` both reach `https://api.openai.com/v1/chat/completions`.
 
 ## Verify It's Working
 
@@ -56,7 +126,7 @@ cmx stats
 New requests should appear in the output. If you see activity, CMX is receiving and forwarding your tool's requests correctly.
 
 <Warning>
-  Custom agent connections are not individually verified. Behavior depends on how closely your tool follows the OpenAI or Anthropic protocol. If requests seem unexpected or malformed, run `cmx doctor` to check your configuration, or [contact support](https://compressi.us/contact) with your CMX version, OS, tool name, and a description of what you observed.
+  Custom agent connections are not individually verified. Behavior depends on how closely your tool follows the OpenAI, Anthropic, or Gemini protocol. If requests seem unexpected or malformed, run `cmx doctor` to check your configuration, or [contact support](https://compressi.us/contact) with your CMX version, OS, tool name, and a description of what you observed.
 </Warning>
 
 ## Suggest a New Integration
