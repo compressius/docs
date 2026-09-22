@@ -43,6 +43,22 @@ Raw request logging is opt-in, local only, and intended for debugging on your ow
 cmx logs status
 ```
 
+## Local Content Vault
+
+When you opt in to the Content Vault (`compression.vault.enabled`), CMX archives the original text it removes from a session — pre-summarized spans, truncated tool outputs, and stripped thinking blocks — into a local SQLite database on your machine. The vault exists so you can recover the original content after compression with `cmx vault show`.
+
+Vault contents never leave your device. They are not synchronized to CMX Cloud, not included in the aggregate telemetry counters, and not shared with your model provider. CMX enforces a size cap (`compression.vault.max_entries`, default `10000`) by pruning the oldest entries on every insert, and you can trim the vault manually at any time:
+
+```bash
+# List the newest vault items
+cmx vault list
+
+# Trim the vault down to the 500 newest items
+cmx vault prune --keep 500
+```
+
+The vault is disabled by default. See [Configuration](/configuration#content-vault-compression-vault) for the full set of keys and the [CLI reference](/cli-reference#content-vault) for the `cmx vault` commands.
+
 ## Aggregate Telemetry Only
 
 The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. No content — prompts, code, or responses — is included in these counters. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.

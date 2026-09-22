@@ -210,6 +210,77 @@ cmx sessions purge
 
 ---
 
+## Content Vault
+
+The `cmx vault` command group inspects and manages the local Content Vault — a SQLite-backed archive of the original text CMX removed from a session before it was summarized, truncated, or stripped. Use it to recover the pre-compression version of a tool output or thinking block after CMX has already replaced it in the live context.
+
+The vault is only populated when `compression.vault.enabled` is `true`. See [Configuration](/configuration) for the config keys.
+
+### `cmx vault list`
+
+List the most recent items stored in the vault. Each row shows the item ID, kind (tool output, thinking block, or summarized span), the originating tool name if any, the original token count, and the time it was recorded.
+
+```bash
+cmx vault list [flags]
+```
+
+**Flags:**
+
+| Flag      | Description                                        |
+| --------- | -------------------------------------------------- |
+| `--limit` | Maximum number of items to list. Default is `50`. |
+
+**Example:**
+
+```bash
+cmx vault list --limit 20
+```
+
+---
+
+### `cmx vault show`
+
+Print the full metadata and original content for a single vault item. Pass the ID from `cmx vault list`.
+
+```bash
+cmx vault show <id>
+```
+
+**Example:**
+
+```bash
+cmx vault show 01J8QK6R7XB2Z9K3TF4H2V6C8P
+```
+
+The output includes the item's kind, tool name and call ID (when the item came from a tool call), the source hash, the original token count, the creation timestamp, and the archived text itself.
+
+---
+
+### `cmx vault prune`
+
+Delete the oldest vault items so that at most a target number of newest items remain. Pruning is applied automatically on every insert using `compression.vault.max_entries`; run this command to trim the vault on demand or to enforce a different cap.
+
+```bash
+cmx vault prune [flags]
+```
+
+**Flags:**
+
+| Flag     | Description                                                                                    |
+| -------- | ---------------------------------------------------------------------------------------------- |
+| `--keep` | Number of newest items to retain. Defaults to `compression.vault.max_entries` (or `10000`).  |
+
+**Example:**
+
+```bash
+# Trim the vault down to the 500 newest items
+cmx vault prune --keep 500
+```
+
+CMX prints how many items were pruned and how many were retained.
+
+---
+
 ### `cmx upgrade`
 
 Check whether a newer version of CMX is available, or download and install the update immediately.
