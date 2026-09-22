@@ -1,0 +1,92 @@
+---
+title: "Connect Cline to CMX for Automatic Context Compression"
+sidebarTitle: "Cline"
+description: "Step-by-step guide to routing the Cline VS Code extension through the CMX local gateway so your coding sessions benefit from automatic context compression."
+keywords:
+  - "Cline CMX"
+  - "Cline VS Code proxy"
+  - "Cline context compression"
+  - "reduce Cline token cost"
+  - "cmx cline setup"
+---
+
+Connect Cline (the VS Code extension) to CMX so requests from Cline pass through the local gateway. CMX compresses eligible context in the background, reducing the tokens sent to your model provider as your Cline sessions grow. You keep signing in through Cline with your existing account or API key.
+
+<Note>
+  **Prerequisites:** CMX must be installed and signed in on your device. Cline must already be installed in VS Code and signed in with your Cline account or configured with a provider API key.
+</Note>
+
+<Steps>
+  <Step title="Set Up CMX">
+    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+
+    ```bash
+    cmx setup
+    ```
+
+    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+  </Step>
+
+  <Step title="Connect Cline">
+    Enable the Cline harness so CMX patches its provider settings:
+
+    ```bash
+    cmx harness enable cline
+    ```
+
+    CMX updates Cline's provider settings file (by default under `~/.cline/data/settings/providers.json`) so its configured providers route through the local gateway. A `.cmx-backup` of the original file is written next to it so the change can be rolled back cleanly.
+
+    Reload the VS Code window (or restart VS Code) so Cline picks up the new configuration.
+  </Step>
+
+  <Step title="Verify the Connection">
+    Confirm that Cline is routing through CMX correctly:
+
+    ```bash
+    cmx harness verify
+    ```
+
+    Send a request from Cline in VS Code as you normally would. Then check CMX for activity:
+
+    ```bash
+    cmx stats
+    ```
+
+    New requests should appear in the stats output. If you see activity, the connection is working.
+  </Step>
+</Steps>
+
+<Note>
+  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
+</Note>
+
+## Automatic reconnection
+
+CMX runs a periodic harness check roughly every 24 hours. If a Cline update rewrites its provider settings and clears the CMX routing, the next `cmx` command notices the drift and re-applies the harness patch automatically. You do not need to run `cmx harness enable cline` again after Cline upgrades.
+
+## Disconnecting
+
+To restore Cline's original configuration and remove CMX from its request path:
+
+```bash
+cmx harness disable cline
+```
+
+CMX restores the previous provider settings from the `.cmx-backup` file it wrote during enable.
+
+## Troubleshooting
+
+If requests from Cline are not appearing in `cmx stats` after a coding session:
+
+1. **Reload the VS Code window** — the new routing only takes effect after Cline reloads its provider settings.
+2. **Check that the harness is enabled** — run `cmx harness list` and confirm Cline shows `enabled (routing through CMX)`.
+3. **Sign in via Cline itself** — CMX does not manage your Cline credentials. If Cline is not signed in, run its native sign-in flow (or set a provider API key in its settings) and then re-enable the harness.
+4. **Run the diagnostics command:**
+
+   ```bash
+   cmx doctor
+   ```
+
+For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
+
+Looking for a different integration? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) if your tool is not on the list of supported harnesses.
