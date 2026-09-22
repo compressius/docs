@@ -68,7 +68,11 @@ CMX's role in this exchange is as policy enforcer, not guesser. It defines the r
 
 When multiple eligible islands exist in the same request, CMX summarizes all of them in a single internal call. The model returns one replacement summary per island. Each replacement is sized to roughly one eighth of its source span, so even modest islands still clear the safety margin instead of being skipped.
 
-Summaries are cached in two places on your machine: an in-memory cache in the running gateway for fast reuse within a session, and the local CMX store for reuse across restarts. Both caches are scoped to the upstream endpoint, model, credential scope, and source content. Cached islands are applied for free on later requests and do not count against the per-request spend limit.
+Summaries are cached in two places on your machine: an in-memory LRU cache in the running gateway for fast reuse within a session (default: 64 entries retained for 24 hours), and the local CMX store for reuse across restarts. Both caches are scoped to the upstream endpoint, model, credential scope, and source content. Cached islands are applied for free on later requests and do not count against the per-request spend limit.
+
+To keep those cache lookups actually hitting as a session grows, CMX caps each contiguous island at `max_island_tokens` (default: 16,000). Fixed island boundaries mean the cache key for an early span stays the same across requests, so the summary paid for once keeps being reused instead of being re-generated every turn.
+
+If your provider refuses the internal summary request itself (for example returning `403 Forbidden` because a free tier only accepts calls from its official client), CMX records that rejection and stops making the same summary call for the same provider route and model for `summary_block_ttl` (default: 10 minutes). Once the window elapses, CMX makes one more attempt to detect a policy change without needing a gateway restart. Compression on other providers or models is unaffected.
 
 ## Local by Design
 
