@@ -28,6 +28,7 @@ From CONFIG you can:
 - **Connect or disconnect coding agents** — set up Codex, OpenCode, or any other supported agent to route its requests through the CMX gateway.
 - **Choose a provider per agent** — select which model provider each agent should use when connecting through CMX.
 - **Adjust preferences** — toggle live activity display, enable reduced motion, and control automatic update checks.
+- **Toggle experimental features** — enable tool output head/tail truncation, historical thinking stripping, and the lossless Content Vault from the Experimental Features section.
 
 Each provider listed in CONFIG shows its current connection status and available actions. Changes take effect immediately in the UI, though the connected agent typically needs a restart before it picks up the new routing.
 
@@ -56,6 +57,27 @@ Each key controls a specific aspect of gateway behavior:
 
 <Note>
   Changes to `cmx.config.toml` take effect after restarting CMX. Run `cmx stop` followed by `cmx start` to apply updated settings.
+</Note>
+
+## Content Vault (`compression.vault`)
+
+The Content Vault is a local SQLite archive of the original pre-compression content of tool outputs, thinking blocks, and summarized spans. When it is enabled, CMX keeps a lossless copy of any text it removes from a session so you can recover it later with the [`cmx vault`](/cli-reference#content-vault) commands.
+
+Configure it under the `compression.vault` block in `cmx.config.toml`:
+
+```toml
+[compression.vault]
+enabled = false
+max_entries = 10000
+```
+
+- **`enabled`** — turns lossless content vaulting on. Default is `false`. When off, CMX still compresses your context but does not archive the original text.
+- **`max_entries`** — the maximum number of items retained in the vault. Default is `10000`. CMX prunes the oldest entries automatically whenever a new item pushes the total above this cap. Set to `0` to disable automatic pruning.
+
+You can also toggle the vault from the **Experimental Features** section of the CONFIG menu in the terminal UI. To trim the vault on demand, run [`cmx vault prune`](/cli-reference#cmx-vault-prune).
+
+<Note>
+  The vault is local-only. Its contents are never synchronized to CMX Cloud and are not included in the aggregate telemetry counters described in the [security model](/security).
 </Note>
 
 ## Background Service

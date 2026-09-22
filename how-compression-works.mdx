@@ -66,6 +66,22 @@ CMX's role in this exchange is as policy enforcer, not guesser. It defines the r
 
 Summaries are cached in memory on your machine, scoped to the upstream endpoint, model, and source content. The same compressible span will not trigger a redundant summarization request if a cached result already covers it.
 
+## Recovering Original Content
+
+When you enable the Content Vault (`compression.vault.enabled`), CMX writes a lossless copy of every span it removes — summarized turns, truncated tool outputs, stripped thinking blocks — to a local SQLite archive before the compressed context is forwarded to your provider. The live request the model sees is unchanged; the vault simply keeps the original text on disk so you can inspect it later.
+
+Use the [`cmx vault`](/cli-reference#content-vault) commands to browse and recover archived items:
+
+```bash
+# List the most recent archived items
+cmx vault list
+
+# Show the original text for one item
+cmx vault show <id>
+```
+
+The vault is local-only and capped by `compression.vault.max_entries` (default `10000`); CMX prunes the oldest entries automatically on every insert. It is off by default — see [Configuration](/configuration#content-vault-compression-vault) to turn it on.
+
 ## Local by Design
 
 Everything sensitive stays on your machine. Your prompts, source code, and model responses are processed locally by the CMX gateway process. They travel from your agent to CMX at `127.0.0.1`, and from CMX to your configured model provider — but they never pass through CMX's servers.
