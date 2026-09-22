@@ -1,0 +1,78 @@
+---
+title: "Connect ChatGPT Desktop to CMX for Automatic Context Compression"
+sidebarTitle: "ChatGPT Desktop"
+description: "Step-by-step guide to routing ChatGPT Desktop through the CMX local gateway so your AI sessions benefit from automatic context compression."
+keywords:
+  - "ChatGPT Desktop CMX"
+  - "ChatGPT Desktop proxy"
+  - "ChatGPT Desktop context compression"
+  - "reduce ChatGPT token cost"
+  - "cmx chatgpt desktop setup"
+---
+
+Connect ChatGPT Desktop to CMX so requests from the ChatGPT Desktop app pass through the local gateway. CMX compresses eligible context in the background, reducing your provider token usage across longer sessions, without requiring any changes to how you use ChatGPT Desktop.
+
+<Note>
+  **Prerequisites:** CMX must be installed and signed in on your device. ChatGPT Desktop must already be installed and signed in. CMX does not replace your OpenAI account; you continue signing in through ChatGPT Desktop as usual.
+</Note>
+
+<Steps>
+  <Step title="Set Up CMX">
+    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+
+    ```bash
+    cmx setup
+    ```
+
+    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
+  </Step>
+  <Step title="Connect ChatGPT Desktop">
+    Open the CMX terminal UI and connect ChatGPT Desktop:
+
+    ```bash
+    cmx
+    ```
+
+    1. Navigate to **CONFIG → ChatGPT Desktop**.
+    2. **Refresh the provider list** to make sure your configured provider appears.
+    3. Select the provider you use in ChatGPT Desktop.
+    4. Click **Connect**.
+    5. Quit and reopen ChatGPT Desktop so it picks up the new routing through CMX.
+
+    ChatGPT Desktop will now send eligible requests through the CMX gateway instead of directly to your provider.
+  </Step>
+  <Step title="Verify the Connection">
+    Confirm that ChatGPT Desktop is routing through CMX correctly:
+
+    ```bash
+    cmx harness verify
+    ```
+
+    Send a request from ChatGPT Desktop as you normally would. Then check CMX for activity:
+
+    ```bash
+    cmx stats
+    ```
+
+    New requests should appear in the stats output. If you see activity, the connection is working.
+  </Step>
+</Steps>
+
+<Note>
+  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full session to get a representative picture.
+</Note>
+
+## Troubleshooting
+
+If requests from ChatGPT Desktop are not appearing in `cmx stats` after a session:
+
+1. **Quit and reopen ChatGPT Desktop** so the new routing takes effect.
+2. **Check the selected connection** by opening CONFIG in CMX and confirming the correct provider is connected.
+3. **Run the diagnostics command:**
+   ```bash
+   cmx doctor
+   ```
+
+For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
+
+Using a tool that is not listed under Providers? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) for instructions on connecting other tools via a custom base URL, or [suggest a provider](/providers/suggest-provider) for us to integrate next.

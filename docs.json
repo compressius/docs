@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "almond",
+  "theme": "sequoia",
   "name": "Compressius Maximus",
   "colors": {
     "primary": "#e14e68",
@@ -26,11 +26,20 @@
             ]
           },
           {
+            "group": "Providers",
+            "pages": [
+              "providers/codex",
+              "providers/opencode",
+              "providers/antigravity",
+              "providers/cline",
+              "providers/chatgpt-desktop",
+              "providers/suggest-provider"
+            ]
+          },
+          {
             "group": "Setup & Configuration",
             "pages": [
               "configuration",
-              "providers/codex",
-              "providers/opencode",
               "providers/custom-agents"
             ]
           },
@@ -103,5 +112,8 @@
   },
   "interaction": {
     "drilldown": false
+  },
+  "icons": {
+    "library": "tabler"
   }
 }
