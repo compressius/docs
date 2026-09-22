@@ -58,6 +58,17 @@ The longer a session runs, the more repetitive history it accumulates: earlier d
 
 You can adjust `min_context_tokens` in your `cmx.config.toml` if you want compression to activate earlier or later in a session.
 
+## Pre-summarization pruning passes
+
+Two mechanical passes run before the paid summary rounds. Both are opt-in, disabled by default, and never call a model. When either is turned off, requests are forwarded byte-identically. When either is turned on, any parse, apply, or post-check failure forwards the original body unchanged, and requests using `previous_response_id` or carrying cache breakpoints (when `skip_when_cache_control` is `true`) are skipped.
+
+You can toggle both from the CONFIG menu without restarting the gateway. The corresponding config keys live under `compression.deduplicate` and `compression.purge_errors` in `cmx.config.toml` — see [Configuration](/configuration#compression-deduplicate) for every field.
+
+- **Duplicate tool-output pruning** (`compression.deduplicate`) — groups complete tool exchanges by tool name and canonicalized arguments, keeps the newest result of each duplicate group, and rewrites older results in place to a fixed placeholder. Only result content is touched; message count, ordering, roles, unknown fields, and tool pairing are preserved. Estimated avoided tokens are credited to your accounting.
+- **Errored tool-input purge** (`compression.purge_errors`) — once a failed tool exchange is at least `compression.purge_errors.turns` user turns old, replaces the call's arguments with a fixed, dialect-safe placeholder. The error result itself is preserved byte-for-byte. Error status comes only from explicit dialect indicators (Anthropic `tool_result.is_error`; explicit `is_error` passthrough on OpenAI Chat Completions and Responses).
+
+Both passes run before the model-directed summary loop below, so they reduce the input that any paid summarization has to work through. Enable them from **CONFIG → Preferences** if your sessions accumulate repeated tool reads or long-lived failed calls.
+
 ## Model-Directed Summaries
 
 Rather than applying heuristic rules about what to drop, CMX asks the model to propose its own summary of the context span. The model has already read every message in the session, so it is better positioned than any fixed algorithm to judge what is essential and what is repetitive history.

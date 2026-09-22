@@ -27,9 +27,11 @@ From CONFIG you can:
 
 - **Connect or disconnect coding agents** — set up Codex, OpenCode, or any other supported agent to route its requests through the CMX gateway.
 - **Choose a provider per agent** — select which model provider each agent should use when connecting through CMX.
-- **Adjust preferences** — toggle live activity display, enable reduced motion, and control automatic update checks.
+- **Adjust preferences** — toggle live activity display, enable reduced motion, control automatic update checks, and turn the two opt-in pre-summarization passes on or off.
 
 Each provider listed in CONFIG shows its current connection status and available actions. Changes take effect immediately in the UI, though the connected agent typically needs a restart before it picks up the new routing.
+
+The preference toggles for **Duplicate tool-output pruning** and **Errored tool-input purge** map directly to `compression.deduplicate.enabled` and `compression.purge_errors.enabled` in `cmx.config.toml`. Both apply to the next proxied request without restarting the gateway. See [Pre-summarization pruning passes](/how-compression-works#pre-summarization-pruning-passes) for what each pass does.
 
 ## Config File (cmx.config.toml)
 
@@ -55,8 +57,46 @@ Each key controls a specific aspect of gateway behavior:
 - **`provider`** — the model provider used for the connected agent. Set automatically through CONFIG.
 
 <Note>
-  Changes to `cmx.config.toml` take effect after restarting CMX. Run `cmx stop` followed by `cmx start` to apply updated settings.
+  Changes to `cmx.config.toml` take effect after restarting CMX. Run `cmx stop` followed by `cmx start` to apply updated settings. The `compression.deduplicate.enabled` and `compression.purge_errors.enabled` toggles are an exception: when changed from the CONFIG menu, they apply to the next proxied request without a restart.
 </Note>
+
+### compression.deduplicate
+
+Opt-in mechanical pass that prunes older duplicate tool results before any paid summarization runs. When two or more complete tool exchanges share the same tool name and canonicalized arguments, CMX keeps the newest result intact and rewrites older result bodies to a fixed placeholder. Message count, ordering, roles, unknown fields, and tool call/result pairing are all preserved, and no model call is made. The pass fails open — any parse, apply, or post-check failure forwards the original body unchanged.
+
+Turn it on when your agent repeatedly re-reads the same files, re-runs the same searches, or otherwise fetches identical tool output across a long session. Leave it off if you rely on every tool result staying byte-identical in later turns.
+
+```toml
+[compression.deduplicate]
+enabled = false
+min_output_tokens = 200
+excluded_tools = ["bash"]
+skip_when_cache_control = true
+```
+
+- **`enabled`** — turn duplicate tool-output pruning on. Default `false`.
+- **`min_output_tokens`** — the smallest tool result worth replacing. Results below this size are left alone. Default `200`.
+- **`excluded_tools`** — tool names whose outputs are never pruned. Defaults to `["bash"]`. `apply_patch` is always excluded regardless of this list.
+- **`skip_when_cache_control`** — when `true`, requests carrying cache breakpoints are forwarded unchanged so the pass never invalidates a prompt cache. Default `true`.
+
+Avoided tokens are credited to your accounting under `pruned_duplicate_tool_outputs`.
+
+### compression.purge_errors
+
+Opt-in mechanical pass that replaces a failed tool call's **arguments** with a fixed, dialect-safe placeholder once the error result is old enough. The error result itself is preserved byte-for-byte, so the model still sees that the call failed — only the now-irrelevant input arguments are dropped. Error status comes exclusively from explicit dialect indicators: Anthropic `tool_result.is_error`, and explicit `is_error` passthrough on OpenAI Chat Completions and Responses. Nothing is inferred from result text. As with the deduplicate pass, the pass never calls a model and fails open.
+
+Turn it on when your agent generates long or repeated failed tool calls (large diffs that don't apply, oversized command invocations, malformed JSON payloads) and you want their arguments to stop occupying context after the agent has moved on.
+
+```toml
+[compression.purge_errors]
+enabled = false
+turns = 4
+skip_when_cache_control = true
+```
+
+- **`enabled`** — turn errored tool-input purging on. Default `false`.
+- **`turns`** — minimum number of user turns after the error result before a call becomes eligible for rewrite. Must be `>= 1`. Default `4`.
+- **`skip_when_cache_control`** — when `true`, requests carrying cache breakpoints are forwarded unchanged. Default `true`.
 
 ## Background Service
 
