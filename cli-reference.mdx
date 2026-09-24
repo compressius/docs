@@ -96,11 +96,23 @@ cmx start
 
 ### `cmx stop`
 
-Stop the background CMX process.
+Stop the background CMX process and point your connected coding agents back to their direct connections.
 
 ```bash
 cmx stop
 ```
+
+Before CMX shuts down the gateway, it restores the configuration of every coding agent routed through CMX. Your agents keep working while CMX is stopped. CMX also saves a reconnect record, so the next `cmx start` routes the same agents through CMX again. CMX only reconnects an agent if its configuration is unchanged since the stop.
+
+Stopping CMX from the interactive terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, also restores your agents.
+
+Running `cmx stop` again after a successful stop is safe. The second run changes nothing and keeps the reconnect record from the first stop.
+
+If CMX cannot restore an agent's configuration, for example because you edited that file by hand, `cmx stop` refuses to shut down the gateway. It prints the agent and the path of the configuration file it could not restore. Fix the conflicting edits in that file, then run `cmx stop` again.
+
+<Note>
+  CMX does not connect agents automatically while the gateway isn't running. Agents are never pointed at an inactive local port.
+</Note>
 
 ---
 
@@ -182,6 +194,8 @@ Verify that saved coding-agent connections are still valid and reachable.
 cmx harness verify
 ```
 
+If an agent still points at CMX while the gateway isn't running, the command reports it and exits with an error. Run `cmx stop` to restore those agents to their direct connections.
+
 ---
 
 ### `cmx harness disable`
@@ -189,13 +203,15 @@ cmx harness verify
 Restore the original harness configuration for all connected coding agents, removing CMX from their request path.
 
 ```bash
-cmx harness disable
+cmx harness disable [harness]
 ```
 
+Pass a harness name, such as `codex`, `opencode`, `claude`, `cline`, `aider`, or `antigravity`, to restore only that agent.
+
 <Tip>
-  Run `cmx harness disable` before uninstalling CMX. This restores your coding
-  agents to their original configuration so they continue working normally after
-  CMX is removed.
+  `cmx uninstall` restores your coding agents automatically. If you remove CMX
+  manually, run `cmx harness disable` first so your agents continue working
+  normally after CMX is removed.
 </Tip>
 
 ---
@@ -243,6 +259,27 @@ Sign out of your CMX account and clear all locally stored credentials from this 
 ```bash
 cmx logout
 ```
+
+---
+
+### `cmx uninstall`
+
+Completely remove CMX from this device. The command restores every connected coding agent to its direct connection, stops the gateway, removes the systemd or launchd user service, deletes CMX configuration and data, and removes the CMX executable. `cmx remove` and `cmx rm` are aliases.
+
+```bash
+cmx uninstall [flags]
+```
+
+**Flags:**
+
+| Flag            | Description                                 |
+| --------------- | ------------------------------------------- |
+| `--yes`, `-y`   | Uninstall without the confirmation prompt   |
+| `--force`, `-f` | Same as `--yes`                             |
+| `--keep-config` | Keep the CMX configuration directory        |
+| `--keep-data`   | Keep session history and the usage database |
+
+If any agent cannot be restored, CMX aborts and stays installed. See [Uninstall](/uninstall) for details and the manual purge fallback.
 
 ---
 

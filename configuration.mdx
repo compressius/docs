@@ -70,6 +70,8 @@ cmx start
 cmx stop
 ```
 
-`cmx start` launches the gateway process in the background. `cmx stop` shuts it down cleanly. CMX does not install an auto-start service — you need to run `cmx start` again after a reboot if you want the gateway running.
+`cmx start` launches the gateway process in the background. `cmx stop` first points your connected coding agents back to their direct connections, then shuts the gateway down. Your agents keep working while CMX is stopped. The next `cmx start` routes the same agents through CMX again, as long as their configuration hasn't changed since the stop.
+
+CMX does not install an auto-start service. Run `cmx start` again after a reboot if you want the gateway running.
 
 To run CMX in the foreground in the current terminal instead, use `cmx serve`.

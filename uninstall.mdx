@@ -1,16 +1,66 @@
 ---
 title: "Uninstall and Purge CMX on Linux, macOS, and Windows"
 sidebarTitle: "Uninstall"
-description: "Complete guide to removing CMX: restore coding-agent routing, stop the gateway, wipe all data, and verify nothing is left behind on any platform."
+description: "Remove CMX with the cmx uninstall command, or follow the manual purge to restore coding-agent routing, stop the gateway, and wipe all data on any platform."
 ---
 
-CMX ships a full-purge procedure for each supported platform. This page walks you through restoring your coding agents to their original configuration, stopping the CMX gateway, and removing every trace of CMX, including processes, auto-start services, credentials, configuration, session history, cached state, and both standalone and package-manager installs.
+The `cmx uninstall` command removes CMX in one step. It restores your coding agents to their direct connections, stops the gateway, and deletes CMX from your system. A manual purge procedure for each platform is also available as a fallback, for example to remove npm or pnpm installs or leftover files.
 
 <Warning>
-  A full purge permanently deletes all local CMX data and preferences. It does not delete your Codex, OpenCode, or AI-provider accounts.
+  Uninstalling permanently deletes all local CMX data and preferences. It does not delete your Codex, OpenCode, or AI-provider accounts.
 </Warning>
 
-## Before Removing CMX
+## Uninstall with `cmx uninstall`
+
+Run the command as the same user that installed CMX:
+
+```bash
+cmx uninstall
+```
+
+CMX asks you to confirm before it removes anything. `cmx remove` and `cmx rm` are aliases for the same command.
+
+`cmx uninstall` performs these steps in order:
+
+1. Points every connected coding agent (Antigravity, Codex, OpenCode, Claude Code, Cline, and Aider) back to its direct connection.
+2. Stops the running gateway.
+3. Deletes the saved reconnect record so a later `cmx start` does not connect your agents to CMX again.
+4. Removes the CMX systemd user service on Linux or the launchd agent on macOS, if present.
+5. Deletes the CMX configuration and data directories.
+6. Removes the CMX executable.
+
+If CMX cannot restore an agent's configuration, it aborts the uninstall and leaves CMX installed. This way no agent is left pointing at a removed gateway. Resolve the reported error, then run `cmx uninstall` again.
+
+**Flags:**
+
+| Flag            | Description                                 |
+| --------------- | ------------------------------------------- |
+| `--yes`, `-y`   | Uninstall without the confirmation prompt   |
+| `--force`, `-f` | Same as `--yes`                             |
+| `--keep-config` | Keep the CMX configuration directory        |
+| `--keep-data`   | Keep session history and the usage database |
+
+**Examples:**
+
+```bash
+# Uninstall without prompting, for example in a script
+cmx uninstall --yes
+
+# Remove CMX but keep your settings and history for a later reinstall
+cmx uninstall --keep-config --keep-data
+```
+
+Restart your coding agents after uninstalling so they pick up their restored configuration.
+
+<Note>
+  If you installed CMX with npm or pnpm, also remove the package with `npm uninstall --global @compressius/cmx` or `pnpm remove --global @compressius/cmx`. Then confirm that `cmx` is no longer on your PATH.
+</Note>
+
+## Manual purge
+
+Use the manual procedure if your installed version doesn't include `cmx uninstall`, or if you want to confirm that every trace of CMX is gone. It covers processes, auto-start services, credentials, configuration, session history, cached state, and both standalone and package-manager installs.
+
+### Before removing CMX
 
 Restore your coding agents' original connection settings while the CMX executable and its routing backups are still available.
 
@@ -34,7 +84,7 @@ Restore your coding agents' original connection settings while the CMX executabl
   Never add `|| true` to `cmx harness disable`. A genuine restoration failure needs attention before CMX is deleted.
 </Warning>
 
-## Complete Purge
+### Complete purge
 
 Choose the tab for your operating system and run the commands as the same user that installed CMX.
 
