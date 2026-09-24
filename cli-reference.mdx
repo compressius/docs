@@ -34,6 +34,20 @@ cmx setup
   separately.
 </Tip>
 
+| Flag | Description |
+| --- | --- |
+| `--connect-ready` | Connect every detected provider that already has native credentials, without prompting. Also turns on the background check that connects newly ready coding clients at most once every 24 hours. |
+
+Use `--connect-ready` if you declined the installer's `[y/N]` prompt and want CMX to connect your ready agents now:
+
+```bash
+cmx setup --connect-ready
+```
+
+<Note>
+  If you declined the installer prompt, the 24-hour check stays off. `cmx start` also respects that choice and doesn't connect clients on its own.
+</Note>
+
 ---
 
 ### `cmx harness enable`

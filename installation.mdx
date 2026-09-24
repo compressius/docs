@@ -69,6 +69,30 @@ Use the standalone installer if you don't have Node.js or prefer a self-containe
   </Tab>
 </Tabs>
 
+## Connect ready agents during install
+
+Before the standalone installer changes any coding client settings, it asks for your consent. After setup starts, CMX lists the coding clients and providers it found that are ready to connect, then asks:
+
+```text
+CMX found these ready coding clients and providers:
+  • codex — ChatGPT
+CMX will update their client settings to route requests through the local gateway.
+Configure all listed providers now? [y/N]:
+```
+
+- **Yes (`y`)**: CMX routes every listed client through the local gateway. It also turns on a background check that runs at most once every 24 hours when you use `cmx` commands. That check connects coding clients you install or configure later.
+- **No (`n`, or press Enter)**: CMX leaves your client settings unchanged. The 24-hour check stays off, and later `cmx start` runs don't connect clients on their own.
+
+No is the default. If no interactive terminal is available, such as in CI or a piped non-interactive shell, CMX skips the prompt and makes no routing changes.
+
+If you declined, you can connect agents later. Run `cmx setup --connect-ready` to connect all ready providers and turn on the 24-hour check:
+
+```bash
+cmx setup --connect-ready
+```
+
+To connect a single agent instead, use `cmx harness enable` or the **CONFIG** screen in the `cmx` terminal interface. See the [CLI reference](/cli-reference) for details.
+
 ## Verify the Installation
 
 After installing, open a new terminal and run:
