@@ -1,72 +1,37 @@
 ---
-title: "Connect Any OpenAI or Anthropic Agent to CMX Gateway"
-sidebarTitle: "Custom Agents"
-description: "Use CMX with any AI coding tool that accepts a custom API base URL and speaks the OpenAI or Anthropic API protocol. Includes base URL reference."
-keywords:
-  - "OpenAI compatible gateway"
-  - "Anthropic compatible gateway"
-  - "custom AI agent"
-  - "AI proxy base URL"
-  - "Chat Completions proxy"
-  - "Anthropic Messages proxy"
-  - "cmx custom agent"
+title: "Connect a custom client"
+sidebarTitle: "Custom clients"
+description: "Route a client with a configurable OpenAI or Anthropic API base URL through CMX."
 ---
 
-CMX works with any coding agent or tool that accepts a custom API base URL and speaks OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages. Codex and OpenCode are verified integrations with dedicated setup guides. Other tools are not individually verified, but many work with CMX without any changes beyond pointing them at the local gateway.
+# Connect a custom client
 
-## Requirements
+Use this guide when your coding tool is not one of the [six supported clients](/providers/overview), but it lets you set its API base URL. The tool must speak a protocol CMX can proxy, and its model provider must already be configured. Custom tools are not automatically detected or restored by `cmx harness` commands.
 
-Your tool must support setting a custom base URL for API requests. This is often exposed as an environment variable, a config file field, or a settings entry labeled something like "API base URL" or "custom endpoint."
+## Choose a base URL
 
-CMX listens at:
-
-```text
-http://127.0.0.1:17322
-```
-
-Make sure CMX is running (`cmx start` or `cmx serve`) before sending requests through it.
-
-## Connecting via Custom Base URL
-
-Point your tool's API base URL at the appropriate CMX endpoint for the protocol it speaks:
-
-- **OpenAI-compatible tools** — use the `/openai` path
-- **Anthropic-compatible tools** — use the `/anthropic` path
+Start the gateway:
 
 ```bash
-# OpenAI-compatible tools
-OPENAI_BASE_URL=http://127.0.0.1:17322/openai
-
-# Anthropic-compatible tools
-ANTHROPIC_BASE_URL=http://127.0.0.1:17322/anthropic
+cmx start
+cmx status
 ```
 
-Set these environment variables before launching your tool, or enter the URLs directly in your tool's settings. Your API keys are passed through to your provider unchanged — CMX never stores them.
+Set the base URL in your tool's settings. Use the route for the upstream provider you intend to reach:
 
-Once your tool is pointed at CMX, all requests will flow through the local gateway. CMX applies compression when sessions grow large enough and policy checks pass, then forwards the request to your configured provider.
+| Client protocol | Example base URL |
+| --- | --- |
+| OpenAI-compatible API | `http://127.0.0.1:17322/route/openai/v1` |
+| Anthropic Messages | `http://127.0.0.1:17322/route/anthropic` |
 
-## Verify It's Working
+Replace `openai` or `anthropic` with another configured upstream ID where that provider supports the same protocol. Different clients append paths differently: for example, an OpenAI SDK may append `/chat/completions` to a `/v1` base URL. Check your client's base-URL documentation before changing it. Do not send provider keys in documentation, logs, or support messages; let the client supply them in its normal authentication fields.
 
-After pointing your tool at CMX and sending a request, check that CMX registered the activity:
+CMX also supports path routing through `/route/<provider>/...` and `/provider/<provider>/...`, the `cmx_provider` query parameter, the `X-CMX-Provider` header, and the `X-CMX-Base-URL` header for a dynamic direct endpoint. These are advanced options for clients that expose request-level routing. Use a valid HTTPS upstream URL, or an exact loopback HTTP endpoint for local models.
 
-```bash
-cmx stats
-```
+## Verify and undo
 
-New requests should appear in the output. If you see activity, CMX is receiving and forwarding your tool's requests correctly.
+Restart the client, send a request, then compare `cmx stats` before and after. `cmx harness verify` cannot check a custom client that it does not manage.
 
-<Warning>
-  Custom agent connections are not individually verified. Behavior depends on how closely your tool follows the OpenAI or Anthropic protocol. If requests seem unexpected or malformed, run `cmx doctor` to check your configuration, or [contact support](https://compressi.us/contact) with your CMX version, OS, tool name, and a description of what you observed.
-</Warning>
+To undo this setup, restore the tool's original API base URL in **that tool** and restart it. Then run `cmx stop` if no other clients need the gateway. CMX cannot restore configuration it did not change.
 
-## Suggest a New Integration
-
-Want CMX to officially support your tool? Reach out at [hello@compressi.us](mailto:hello@compressi.us?subject=CMX%20provider%20suggestion) and include:
-
-- **Tool name and a link** to its website or integration documentation
-- **Your operating system** and how you connect to your model provider today
-- **The workflow you want CMX to support** and what would make the integration useful
-
-A short description is enough to get started. Leave out API keys and any private conversation or source-code content. We review available connection options and assess whether CMX can safely support the tool's behavior. A suggestion does not guarantee support or a delivery date, but it helps us understand demand.
-
-You can also reach us through the [contact page](https://compressi.us/contact).
+For a first-class integration request, [suggest a client](/providers/suggest-provider).

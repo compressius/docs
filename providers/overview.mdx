@@ -1,0 +1,24 @@
+---
+title: "Supported coding clients"
+sidebarTitle: "Client overview"
+description: "Choose a CMX coding client integration and learn the difference between clients and model providers."
+---
+
+# Supported coding clients
+
+A coding client is the application you use. A model provider is the service that answers its API requests. CMX detects these six clients and can change their local routing settings. Install and sign in to the client first; CMX does not install it for you.
+
+| Client | What CMX changes | Guide |
+| --- | --- | --- |
+| Codex | Its selected OpenAI API or ChatGPT route in `config.toml` | [Codex](/providers/codex) |
+| OpenCode | One selected provider route in its JSON or JSONC config | [OpenCode](/providers/opencode) |
+| Claude Code | `ANTHROPIC_BASE_URL` in its settings | [Claude Code](/providers/claude-code) |
+| Aider | The OpenAI-compatible API base in its config | [Aider](/providers/aider) |
+| Antigravity CLI (`agy`) | A reversible wrapper around the CLI executable | [Antigravity CLI](/providers/antigravity) |
+| Cline | Its provider settings, including the local base URL | [Cline](/providers/cline) |
+
+Run `cmx harness list` to see what CMX detects on **your** machine. Run `cmx providers <client> list` to inspect discovered provider IDs and credential readiness. Listing does not change routing. A connected client normally needs a restart or editor reload before it uses new settings.
+
+A different tool may work if it lets you set an API base URL and speaks a supported protocol. See [Custom clients](/providers/custom-agents). CMX does not offer an automatic ChatGPT Desktop integration.
+
+To undo a connection, use `cmx providers <client> disconnect <provider-id>` for a selected provider or `cmx harness disable <client>` for the whole client. `cmx stop` restores direct routing before stopping the gateway. See [Undo and uninstall](/uninstall).

@@ -1,75 +1,59 @@
 ---
-title: "Configure the CMX Gateway, Agents, and Preferences"
+title: "Configure CMX"
 sidebarTitle: "Configuration"
-description: "Manage CMX connections, gateway settings, and preferences through the terminal UI CONFIG menu or the cmx.config.toml file. Covers all config keys."
+description: "Manage client routing, local gateway settings, compression policy, and storage."
 ---
 
-CMX is configured through its interactive terminal UI (run `cmx`) and a local config file (`cmx.config.toml`). Most users only need the CONFIG menu to connect agents and adjust preferences. Advanced users can edit the config file directly to tune gateway behavior such as compression thresholds and protected tools.
+# Configure CMX
 
-## Using the Terminal UI
-
-Run `cmx` in your terminal to open the interactive interface. From here you can navigate menus, manage connections, and monitor live activity without touching any config files.
-
-Keyboard shortcuts for navigating the UI:
-
-| Key | Action |
-|---|---|
-| `Tab` or arrow keys | Move focus between elements |
-| `Enter` or click | Select the focused item |
-| `Esc` | Go back to the previous screen |
-| `M` | Toggle mouse capture |
-
-## CONFIG Menu
-
-Open the CONFIG menu from the main CMX interface to manage all connection and preference settings.
-
-From CONFIG you can:
-
-- **Connect or disconnect coding agents** — set up Codex, OpenCode, or any other supported agent to route its requests through the CMX gateway.
-- **Choose a provider per agent** — select which model provider each agent should use when connecting through CMX.
-- **Adjust preferences** — toggle live activity display, enable reduced motion, and control automatic update checks.
-
-Each provider listed in CONFIG shows its current connection status and available actions. Changes take effect immediately in the UI, though the connected agent typically needs a restart before it picks up the new routing.
-
-## Config File (cmx.config.toml)
-
-CMX stores its gateway configuration in a local `cmx.config.toml` file. Most settings are managed automatically by the terminal UI, but you can edit this file directly for fine-grained control.
-
-```toml
-# CMX gateway configuration
-port = 17322
-min_context_tokens = 32000
-preserve_tail_tokens = 12000
-protected_tools = ["task", "skill", "write", "edit"]
-client = ""
-provider = ""
-```
-
-Each key controls a specific aspect of gateway behavior:
-
-- **`port`** — the local port CMX listens on. Default is `17322`. Your coding agent must point to this port when routing through CMX.
-- **`min_context_tokens`** — the session must exceed this token count before CMX considers compression. Default is `32000`. Short conversations below this threshold are passed through unchanged.
-- **`preserve_tail_tokens`** — the most recent portion of context, up to this token count, is always kept intact and never compressed. Default is `12000`.
-- **`protected_tools`** — tool calls matching these names, and their results, are never compressed. Defaults cover `task`, `skill`, `write`, and `edit`. Add any other tool names you want to protect.
-- **`client`** — the coding agent currently connected to CMX. Set automatically when you connect an agent through CONFIG.
-- **`provider`** — the model provider used for the connected agent. Set automatically through CONFIG.
-
-<Note>
-  Changes to `cmx.config.toml` take effect after restarting CMX. Run `cmx stop` followed by `cmx start` to apply updated settings.
-</Note>
-
-## Background Service
-
-CMX can run as a background process so it is always available during coding sessions without occupying a terminal window.
+Most people only need **CONFIG** in the terminal interface:
 
 ```bash
-# Start CMX in the background
-cmx start
-
-# Stop the background process
-cmx stop
+cmx
 ```
 
-`cmx start` launches the gateway process in the background. `cmx stop` shuts it down cleanly. CMX does not install an auto-start service — you need to run `cmx start` again after a reboot if you want the gateway running.
+Use it to inspect discovered clients, connect a provider, disconnect one, and change local display or compression preferences. Restart a coding client after its routing settings change. For command-line control, use `cmx providers <client> list`, `connect`, and `disconnect`; see the [CLI reference](/cli-reference).
 
-To run CMX in the foreground in the current terminal instead, use `cmx serve`.
+## Where settings live
+
+CMX's own configuration is `config.json` in the following directory:
+
+| Operating system | Default configuration | Default local data |
+| --- | --- | --- |
+| Linux | `~/.config/cmx/config.json` | `~/.local/share/cmx/` |
+| macOS | `~/Library/Application Support/cmx/config.json` | `~/Library/Application Support/cmx/` |
+| Windows | `%APPDATA%\cmx\config.json` | `%LOCALAPPDATA%\cmx\` |
+
+Linux respects `XDG_CONFIG_HOME` and `XDG_DATA_HOME`. The data directory holds local state such as usage records, cached summaries, and connection metadata. The CMX provider map stays in CMX's `config.json` when client routing is restored; it is not a backup of your coding client's settings.
+
+CMX uses JSON, **not** `cmx.config.toml`. A small example of the relevant fields is:
+
+```json
+{
+  "gateway": { "listen_addr": "127.0.0.1:17322" },
+  "compression": {
+    "min_context_tokens": 1000,
+    "preserve_tail_tokens": 1000
+  }
+}
+```
+
+CMX fills in other defaults when loading its configuration. Keep the gateway on loopback. Do not place provider API keys in this file. Use the native coding client or its environment for credentials. After editing CMX settings, restart the gateway with `cmx restart` and restart affected coding clients if their routes changed.
+
+## Compression controls
+
+The default minimum context is **1,000 estimated tokens** per request, and the recent protected tail is **1,000 tokens**. CMX also requires sufficient eligible context and a proposal that passes policy and economics checks; reaching the minimum alone does not guarantee a summary.
+
+The **CONFIG** screen can enable selected local optimizations, including duplicate tool-output pruning, removal of historical error output, truncation of long tool output, stripping eligible historical thinking, and the local content vault. These options have different effects. The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it.
+
+The default protected tool list includes `task`, `skill`, `todowrite`, `todoread`, `write`, `edit`, and `apply_patch`. Recent context, instructions, opaque content, and complete protected tool exchanges are also safeguarded by policy. See [How compression works](/how-compression-works).
+
+## Gateway lifecycle
+
+```bash
+cmx start      # background process for this user
+cmx status
+cmx stop       # restore managed client routes, then stop
+```
+
+`cmx start` launches a detached process. It does not automatically install a login service. If restoration fails during `cmx stop`, CMX keeps the gateway running and reports the client conflict.

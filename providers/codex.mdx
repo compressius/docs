@@ -1,85 +1,36 @@
 ---
-title: "Connect OpenAI Codex to CMX for Context Compression"
+title: "Connect Codex"
 sidebarTitle: "Codex"
-description: "Step-by-step guide to routing OpenAI Codex through the CMX local gateway so your coding sessions benefit from automatic context compression."
-keywords:
-  - "Codex CMX"
-  - "OpenAI Codex proxy"
-  - "Codex context compression"
-  - "reduce Codex token cost"
-  - "Codex gateway"
-  - "cmx codex setup"
+description: "Route Codex OpenAI API or ChatGPT requests through CMX and restore direct routing."
 ---
 
-Connect Codex to CMX so every request from Codex passes through the local gateway. CMX compresses repeated context in the background, reducing the tokens sent to your model provider on each turn — without changing how you use Codex.
+# Connect Codex
 
-<Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. Codex must already be installed with a working model provider sign-in. CMX does not replace your provider account; you continue signing in through Codex as usual.
-</Note>
+Codex supports two native sign-in modes: OpenAI API (`api`) and ChatGPT (`chatgpt`). Sign in through Codex first. CMX leaves its native credentials with Codex.
 
-<Steps>
-  <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+```bash
+codex login
+cmx setup --ask-connect-ready
+cmx providers codex list
+```
 
-    ```bash
-    cmx setup
-    ```
+If you declined the setup prompt, choose the mode that matches your Codex sign-in:
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
-  </Step>
+```bash
+cmx providers codex connect api
+# or, for a ChatGPT sign-in:
+cmx providers codex connect chatgpt
+```
 
-  <Step title="Connect Codex">
-    Open the CMX terminal UI and connect Codex to your provider:
+Use one mode at a time. CMX updates Codex's `config.toml` (normally `~/.codex/config.toml`; `CODEX_HOME` is supported) and starts the gateway if needed. Restart Codex, send a request, and check `cmx stats`. `cmx harness verify` checks whether Codex points at a running gateway.
 
-    ```bash
-    cmx
-    ```
+## Return to Codex directly
 
-    1. Navigate to **CONFIG → Codex**.
-    2. Select your connection from the list.
-    3. Click **Connect**.
-    4. Restart Codex so it picks up the new routing through CMX.
+```bash
+cmx providers codex disconnect api
+# Substitute chatgpt if that was the connected mode.
+```
 
-    Codex will now send all requests through the CMX gateway instead of directly to your provider.
-  </Step>
+You can also run `cmx harness disable codex`. Restart Codex afterward. `cmx stop` restores direct settings while stopping the gateway; a later `cmx start` can reconnect previously selected routes. An explicit disconnect or disable is the way to stay direct.
 
-  <Step title="Verify the Connection">
-    Confirm that Codex is routing through CMX correctly:
-
-    ```bash
-    cmx harness verify
-    ```
-
-    ```bash
-    cmx status
-    ```
-
-    Send a request from Codex as you normally would in a coding session. Then check CMX for activity:
-
-    ```bash
-    cmx stats
-    ```
-
-    New requests should appear in the stats output. If you see activity, the connection is working.
-  </Step>
-</Steps>
-
-<Note>
-  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
-</Note>
-
-## Troubleshooting
-
-If requests from Codex are not appearing in `cmx stats` after a coding session:
-
-1. **Restart Codex** — the new routing only takes effect after a full restart.
-2. **Check the selected connection** — open CONFIG → Codex in CMX and confirm the correct provider is connected.
-3. **Run the diagnostics command:**
-
-   ```bash
-   cmx doctor
-   ```
-
-For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
-
-Looking for a different integration? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) if your tool is not Codex or OpenCode.
+If `cmx providers codex list` says credentials are missing, complete Codex's native sign-in. For API-key mode, use Codex's supported key input or an environment variable; never paste keys into CMX config or support messages. See [Troubleshooting](/troubleshooting).

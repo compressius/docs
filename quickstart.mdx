@@ -1,84 +1,63 @@
 ---
-title: "CMX Quick Start: Install, Connect, and Save Tokens"
-sidebarTitle: "Quick Start"
-description: "Install CMX, sign in with your free account, connect your AI coding agent, and verify that requests are flowing — all in under a minute."
-keywords:
-  - "CMX quickstart"
-  - "install CMX"
-  - "connect coding agent"
-  - "cmx setup"
-  - "cmx stats"
-  - "AI token savings"
-  - "local gateway setup"
+title: "Quickstart"
+sidebarTitle: "Quickstart"
+description: "Install CMX, choose a coding client connection, verify traffic, and undo routing."
 ---
 
-This page walks you through installing CMX, signing in with your free account, connecting your coding agent, and verifying that requests are flowing through the gateway. You'll be up and running in under a minute.
+# Quickstart
 
-<Steps>
-  <Step title="Install CMX">
-    Choose the install method that fits your setup. The npm and pnpm methods require Node.js 18 or later. The curl method installs a standalone binary with no Node.js dependency.
+## 1. Install
 
-    <CodeGroup>
-      ```bash npm
-      npm install --global @compressius/cmx
-      ```
+Choose one method from the [installation guide](/installation). For Linux or macOS, the standalone installer is:
 
-      ```bash pnpm
-      pnpm add --global @compressius/cmx
-      ```
+```bash
+curl -sSfL https://compressi.us/install.sh | sh
+```
 
-      ```sh curl (Linux / macOS)
-      curl -sSfL https://compressi.us/install.sh | sh
-      ```
-    </CodeGroup>
+For Windows, run in PowerShell:
 
-    After the install completes, open a new terminal and confirm the binary is available:
+```powershell
+iwr -useb https://compressi.us/install.ps1 | iex
+```
 
-    ```bash
-    cmx --version
-    ```
+The standalone installers run setup and ask whether to connect ready coding clients. **Yes** connects those listed. **No** leaves them on their direct connections and prints the commands for connecting later. If the terminal cannot read an answer, setup reports an error; open an interactive terminal and run `cmx setup --ask-connect-ready`.
 
-    If the command is not found, see the [Installation](/installation) page for PATH setup instructions.
-  </Step>
+## 2. Check the gateway and choose a client
 
-  <Step title="Complete Setup">
-    Run the setup command to sign in and start the local gateway:
+```bash
+cmx --version
+cmx status
+cmx harness list
+```
 
-    ```bash
-    cmx setup
-    ```
+If you declined automatic connection, list the providers discovered for your client, then connect one by its displayed ID:
 
-    CMX opens a browser window for account sign-in. Complete the sign-in flow, then return to the terminal. CMX will detect any supported coding agents on your machine and prompt you to choose one to connect.
-  </Step>
+```bash
+cmx providers codex list
+cmx providers codex connect api
+```
 
-  <Step title="Connect Your Agent">
-    Open the CMX terminal interface, navigate to **CONFIG**, select your coding agent, choose your provider, and press **Connect**. Then restart your coding agent so it picks up the new gateway address (`127.0.0.1:17322`).
+For Codex, use `api` for its OpenAI API sign-in or `chatgpt` for its ChatGPT sign-in. Other clients have different IDs; see [supported clients](/providers/overview). You can also open `cmx` and choose **CONFIG**. `cmx providers <client> list` only reports status; it does not connect the client.
 
-    Verified agents and their connection steps:
+If you installed a package without running setup, run `cmx setup --ask-connect-ready` to make this choice. Plain `cmx setup` starts the gateway and may connect Codex's existing sign-in.
 
-    - **Codex** — CONFIG → Codex → select your connection → Connect → restart Codex
-    - **OpenCode** — CONFIG → OpenCode → refresh the provider list → connect your provider → restart OpenCode
+## 3. Confirm a real request
 
-    To confirm the connection is working, run:
+Restart the coding client, then run:
 
-    ```bash
-    cmx harness verify
-    ```
-  </Step>
+```bash
+cmx harness verify
+cmx stats
+```
 
-  <Step title="Check Your Activity">
-    Send a few messages in your coding agent, then check your local statistics:
+Send a short request in the client and run `cmx stats` again. New activity shows that requests are reaching CMX. A running gateway or a successful `harness verify` alone does not prove the client sent traffic.
 
-    ```bash
-    cmx stats
-    ```
+## 4. Return to a direct connection
 
-    Look for new requests in the output. If requests appear, CMX is receiving traffic from your agent and compression will activate once your session context grows large enough.
-  </Step>
-</Steps>
+```bash
+cmx providers codex disconnect api
+```
 
-<Note>
-  Short sessions often show little or no token savings. CMX only applies compression once a session crosses the configured context threshold, and the net saving must be positive before any summary is applied. Run a longer coding session — one with many back-and-forth turns — to see meaningful compression take effect.
-</Note>
+Use the provider ID you connected. For all supported clients, `cmx stop` restores direct routing before stopping the gateway. A later `cmx start` may reconnect routes that `stop` saved; use the provider disconnect command or `cmx harness disable <client>` when you want to stay direct. See [Undo and uninstall](/uninstall).
 
-Ready to explore further? The [Installation](/installation) page covers all install methods and platform-specific options. The [Configuration](/configuration) page explains how to tune compression thresholds and manage agent connections.
+<Note>Local compression works without CMX account sign-in. Run `cmx login` only to link this device to your account dashboard.</Note>

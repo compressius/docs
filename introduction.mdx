@@ -1,57 +1,29 @@
 ---
-title: "Compressius Maximus (CMX): What It Is and How It Works"
+title: "What CMX does"
 sidebarTitle: "Introduction"
-description: "Learn what CMX is, the token-cost problem it solves, how model-directed compression works, and which coding agents and providers it supports."
-keywords:
-  - "what is CMX"
-  - "Compressius Maximus"
-  - "AI context compression"
-  - "LLM token savings"
-  - "model-directed compression"
-  - "AI coding agent gateway"
-  - "prompt compression"
+description: "Understand the local CMX gateway, coding clients, model providers, and compression limits."
 ---
 
-Compressius Maximus (CMX) is a free local gateway that sits between your AI coding agent and your model provider. Every time your agent sends a request, CMX inspects the context, compresses the repetitive parts, and forwards a leaner payload to your provider — so you spend fewer tokens without changing how you code.
+# What CMX does
 
-## The Problem CMX Solves
+A coding client sends conversation history with its model requests. As the history grows, the same older text may be sent many times. CMX runs a local gateway that can replace eligible older spans with a shorter, model-generated summary before forwarding a request.
 
-Long coding sessions accumulate enormous context. Every new request carries the full history of earlier turns: superseded attempts, resolved errors, and exchanges the model no longer needs word-for-word. Your provider charges for every input token in that payload, so the longer a session runs, the more you pay just to re-send history that doesn't change the answer.
+```text
+Coding client → CMX on 127.0.0.1:17322 → your model provider
+```
 
-Most tools that address this problem use static heuristics to decide what to drop. The result is unpredictable: useful context disappears, or nothing gets trimmed at all.
+A **coding client** is the tool you work in, such as Codex, OpenCode, Claude Code, Aider, Antigravity CLI, or Cline. A **model provider** is the upstream service that answers its API requests, such as OpenAI or Anthropic. CMX configures client routing; it does not supply a provider account or a model subscription.
 
-## How CMX Helps
+## What changes when you connect
 
-CMX takes a model-directed approach. When a session grows past a configurable threshold, CMX asks your model to propose a factual summary of eligible older turns. Before applying anything, a deterministic gateway policy checks the proposal against four criteria:
+CMX updates the selected client's local routing settings so its requests reach the gateway. Your model choice and native provider credentials remain with that client. Restart the client after connecting or disconnecting so it loads the settings.
 
-- **Protected tool calls** — `task`, `skill`, `write`, and `edit` calls and their results are never touched.
-- **Recent context** — the most recent turns are always preserved in full.
-- **Estimated savings** — compression only proceeds when the net token saving is positive.
-- **Opaque content** — anything CMX cannot safely parse passes through unchanged.
+The gateway checks each eligible request against its compression policy. It can prune selected duplicate or failed historical tool output, truncate long tool output, or request a summary of older context when enabled. Protected tool calls and their results, instructions, opaque content, and a recent context tail remain protected. If a proposed summary fails validation, CMX forwards the original request.
 
-If a proposal fails any check, the original request is forwarded untouched. Accepted summaries are cached in memory and reused for subsequent requests in the same session. CMX runs entirely on your machine at `127.0.0.1:17322` and proxies requests to the provider you already use — your provider credentials are never seen by CMX.
+Only OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages have the documented compression path. Other proxied request formats can pass through unchanged. See [How compression works](/how-compression-works).
 
-## Who It's For
+## Account and cost
 
-CMX is built for developers who use AI coding agents and want their API bill to shrink automatically. It works with:
+Local use does not require a CMX account. `cmx login` links your device to the optional dashboard. Your model provider may charge for normal requests and for internal summarization calls. CMX's savings figures are estimates; they do not replace provider billing records.
 
-- **Codex** — verified integration with automatic harness setup
-- **OpenCode** — verified integration with per-provider connection
-- **Any OpenAI- or Anthropic-compatible agent** — any tool that accepts a custom base URL and speaks OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages
-
-If you run long coding sessions where context grows across many turns, CMX will find opportunities to compress that history and pass savings on to you. Short sessions or sessions that rarely revisit earlier context will see smaller gains.
-
-## Privacy & Security
-
-CMX is local-first by design. The gateway binds exclusively to `127.0.0.1:17322` — it never listens on a network-accessible interface. Your prompts, source code, and model responses travel only between your machine and your configured provider. CMX servers never receive your conversation content.
-
-Provider credentials are held in memory for the lifetime of the gateway process and are never written to disk. The only data that leaves your device is a signed aggregate counter sent to your CMX account — a total of tokens handled and saved, with no attached content.
-
-<CardGroup cols={2}>
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Install CMX, sign in, and connect your coding agent in four steps.
-  </Card>
-  <Card title="How Compression Works" icon="arrows-to-circle" href="/how-compression-works">
-    Understand the policy checks and model-directed summarization behind CMX.
-  </Card>
-</CardGroup>
+Read [Security and data handling](/security) for what remains on your device and what, if anything, is sent to CMX Cloud.

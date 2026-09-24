@@ -1,69 +1,35 @@
 ---
-title: "How to Update CMX to the Latest Stable or Nightly Build"
+title: "Update CMX"
 sidebarTitle: "Updates"
-description: "Check for and install CMX updates using the built-in upgrade command, your package manager, or by switching to the nightly channel for pre-release builds."
+description: "Check and install published CMX releases without changing provider credentials."
 ---
 
-CMX ships updates as stable releases and nightly builds. You can check for and install updates using the built-in `cmx upgrade` command without reinstalling CMX from scratch or repeating account setup. Read the release notes before updating, especially for major version bumps, to catch any breaking changes before they affect an active coding session.
+# Update CMX
 
-## Check for Updates
-
-Run the following command to check whether a newer version is available:
+Check the installed version and look for a published update:
 
 ```bash
+cmx --version
 cmx upgrade
 ```
 
-This reports the available version number but does not install anything. Use it to find out whether an update exists before deciding to apply it.
-
-## Install an Update
-
-Once you know an update is available, install it with:
+The check does not install anything. Read the [published release notes](https://github.com/compressius/cmx2/releases), then install when you are ready:
 
 ```bash
 cmx upgrade --install
+cmx --version
 ```
 
-This downloads the update, verifies its SHA-256 checksum against the published release manifest, and installs it in place. You do not need to uninstall your current version first. After installation, restart CMX with `cmx stop` followed by `cmx start` to run the new version.
+CMX verifies a downloaded release against its published checksum. A locally built version or source checkout is not automatically a published update. If `cmx upgrade` says you are current, there may be no newer public release even if development work exists.
 
-## Update via Package Manager
+If you installed the npm package, update it through the same package manager instead:
 
-If you installed CMX with npm or pnpm, you can also update by rerunning your original install command. This fetches the latest published stable package from the registry:
-
-<CodeGroup>
-```bash npm
-npm install --global @compressius/cmx
+```bash
+npm install --global @compressius/cmx@latest
+# or
+pnpm add --global @compressius/cmx@latest
 ```
 
-```bash pnpm
-pnpm add --global @compressius/cmx
-```
-</CodeGroup>
+Check `cmx status` after updating. Restart a long-running coding client when its routing settings change. Existing provider authentication remains in the native client; an update does not replace your provider account.
 
-This method is equivalent to `cmx upgrade --install` for package manager installations. Use whichever fits your workflow.
-
-## Switch to Nightly
-
-Nightly builds contain the latest in-progress features and fixes before they land in a stable release. To switch to the nightly channel, install the `nightly` tag:
-
-<CodeGroup>
-```bash npm
-npm install --global @compressius/cmx@nightly
-```
-
-```bash pnpm
-pnpm add --global @compressius/cmx@nightly
-```
-</CodeGroup>
-
-<Warning>
-  Nightly builds may contain bugs or incomplete features. Use a test machine or a non-critical project when running nightly. Stable is recommended for everyday coding sessions.
-</Warning>
-
-## Release Notes
-
-Full release notes for every stable build are available on the [changelog](/changelog) page. Every release, including nightlies, is listed on the [GitHub releases page](https://github.com/compressius/cmx/releases).
-
-<Tip>
-  Read the release notes before updating, especially for major version bumps. Breaking changes, new configuration keys, and changed defaults are all called out there, so you can prepare before the update affects a live coding session.
-</Tip>
+To stop using CMX, follow [Undo and uninstall](/uninstall) before deleting any executable or package.

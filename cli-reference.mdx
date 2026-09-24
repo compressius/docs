@@ -1,276 +1,74 @@
 ---
-title: "CMX CLI Reference: All Commands, Flags, and Examples"
-sidebarTitle: "CLI Reference"
-description: "Complete reference for all CMX CLI commands: setup, start/stop, stats, harness, sessions, upgrade, and more. Includes flags and example output."
+title: "CLI reference"
+sidebarTitle: "CLI reference"
+description: "The commands for setup, client routing, gateway lifecycle, usage, updates, and removal."
 ---
 
-The `cmx` command-line interface provides everything you need to manage your local gateway, connect coding agents, monitor token usage, and update CMX. Run `cmx --help` to see the commands available in your installed version.
+# CLI reference
 
----
+Run `cmx --help` or `cmx <command> --help` for the exact flags in your installed version. This page covers the normal workflow; `<client>` means one of `codex`, `opencode`, `claude`, `aider`, `antigravity`, or `cline`.
 
-## Get Started
+## Setup and account
 
-### `cmx login`
+| Command | Action |
+| --- | --- |
+| `cmx` | Open the terminal interface; use **CONFIG** to manage routing. |
+| `cmx setup --ask-connect-ready` | Start the gateway and ask whether to connect detected, ready providers. Standalone installers use this mode. |
+| `cmx setup --connect-ready` | Explicitly connect detected providers with available native credentials. |
+| `cmx setup` | Start the gateway and discover providers; may connect Codex's existing native sign-in. |
+| `cmx login` / `cmx logout` | Sign in to or out of the **optional CMX account**. These do not sign in to your model provider. |
+| `cmx dashboard` | Open the account-linked web dashboard. |
 
-Sign in and pair this device with your CMX account through the browser.
+For an installer prompt, `y` connects the listed ready providers. `n` or Enter keeps them direct, disables periodic auto-connect, and prints manual CLI and TUI instructions. If the terminal cannot accept input, setup returns an error; rerun `cmx setup --ask-connect-ready` in an interactive terminal.
 
-```bash
-cmx login
-```
-
----
-
-### `cmx setup`
-
-Sign in and connect detected coding agents. This is the recommended command to run the first time you install CMX — it handles browser sign-in, gateway startup, and agent connection in a single guided flow.
-
-```bash
-cmx setup
-```
-
-<Tip>
-  Run `cmx setup` immediately after installation. It combines login, gateway
-  start, and coding agent connection so you don't have to run each step
-  separately.
-</Tip>
-
----
-
-### `cmx harness enable`
-
-Route a detected coding agent through CMX so its traffic passes through the local compression gateway.
-
-```bash
-cmx harness enable
-```
-
----
-
-### `cmx serve`
-
-Run CMX in the current terminal as a foreground process. The gateway stays active for as long as the terminal session remains open.
-
-```bash
-cmx serve
-```
-
----
-
-### `cmx doctor`
-
-Diagnose configuration and connectivity issues. This command inspects your installation, checks gateway connectivity, and reports any problems it finds.
-
-```bash
-cmx doctor
-```
-
-<Tip>
-  The output of `cmx doctor` may include local file paths and configuration
-  details. Review it carefully and remove any sensitive information before
-  sharing it with support.
-</Tip>
-
----
-
-## Start and Stop
-
-### `cmx`
-
-Open the interactive terminal interface. Use this to manage connections, configure providers, and adjust preferences through a keyboard-driven UI.
-
-```bash
-cmx
-```
-
----
-
-### `cmx start`
-
-Start CMX as a background process. The gateway continues running after you close the terminal.
-
-```bash
-cmx start
-```
-
----
-
-### `cmx stop`
-
-Stop the background CMX process.
-
-```bash
-cmx stop
-```
-
----
-
-### `cmx status`
-
-Show the current CMX status, including whether the gateway is running and how it is configured.
-
-```bash
-cmx status [flags]
-```
-
-**Flags:**
-
-| Flag     | Description                            |
-| -------- | -------------------------------------- |
-| `--json` | Output status in machine-readable JSON |
-
-**Examples:**
-
-```bash
-# Human-readable status
-cmx status
-
-# Machine-readable JSON output
-cmx status --json
-```
-
----
-
-## Usage and Diagnostics
-
-### `cmx stats`
-
-Show today's token and compression statistics, including tokens handled, estimated net savings, and provider activity.
-
-```bash
-cmx stats
-```
-
----
-
-### `cmx logs status`
-
-Check whether opt-in raw logging is currently enabled on this device.
-
-```bash
-cmx logs status
-```
-
----
-
-### `cmx dashboard`
-
-Open the CMX web dashboard in your default browser. The dashboard shows account-level usage history across all your devices.
-
-```bash
-cmx dashboard
-```
-
----
-
-## Connections and Maintenance
-
-### `cmx harness list`
-
-List all detected coding agent harnesses on this device.
+## Providers and client routing
 
 ```bash
 cmx harness list
-```
-
----
-
-### `cmx harness verify`
-
-Verify that saved coding-agent connections are still valid and reachable.
-
-```bash
+cmx providers codex list
+cmx providers codex connect api
+cmx providers codex disconnect api
 cmx harness verify
 ```
 
----
+| Command | Action |
+| --- | --- |
+| `cmx providers [client] list` | Discover native provider IDs and readiness without changing routing. |
+| `cmx providers <client> connect <id>` | Connect a selected native provider through CMX; starts the gateway if needed. |
+| `cmx providers <client> disconnect <id>` | Restore that provider or client to direct routing. |
+| `cmx providers <client> check <id>` | Check the selected provider. |
+| `cmx providers <client> signin <id>` | Print the native sign-in guidance for that provider. |
+| `cmx harness enable [client]` | Connect a detected client; with no client, acts on detected clients. |
+| `cmx harness disable [client]` | Restore a detected client's direct settings; with no client, acts on detected clients. |
+| `cmx harness verify` | Check managed routes and report problems. A real client request is still needed to prove traffic flows. |
 
-### `cmx harness disable`
+See [Supported clients](/providers/overview) for connection IDs and readiness limits. The `providers` ID belongs to the **client**; it is not necessarily the same as CMX's [upstream provider ID](/model-providers).
 
-Restore the original harness configuration for all connected coding agents, removing CMX from their request path.
+## Gateway and usage
 
-```bash
-cmx harness disable
-```
+| Command | Action |
+| --- | --- |
+| `cmx start` | Start the local background gateway; may restore previously selected routes. |
+| `cmx serve` | Run the gateway in the current terminal. |
+| `cmx status` / `cmx status --json` | Show gateway state and version. |
+| `cmx restart` | Restart the gateway after a CMX configuration change. |
+| `cmx stop` | Restore managed clients to direct settings, then stop. Leaves the gateway running if restoration fails. |
+| `cmx stats` | Show local usage and savings estimates. |
+| `cmx doctor` | Run installation and connectivity checks. |
+| `cmx logs` | Explain the available diagnostics; CMX does not capture raw prompts or responses. |
+| `cmx permissions` | Enforce owner-only permissions on CMX directories. |
+| `cmx sessions purge` | Delete expired local sessions. |
+| `cmx vault list`, `show <id>`, `prune` | Inspect or prune local lossless vault entries if enabled. |
 
-<Tip>
-  Run `cmx harness disable` before uninstalling CMX. This restores your coding
-  agents to their original configuration so they continue working normally after
-  CMX is removed.
-</Tip>
+## Updates and removal
 
----
+| Command | Action |
+| --- | --- |
+| `cmx upgrade` | Check for a published update. |
+| `cmx upgrade --install` | Download and install the latest verified release. |
+| `cmx uninstall` | Restore clients, stop CMX, and remove local CMX files and executable. |
+| `cmx uninstall --yes` | Run the same removal without an interactive confirmation. |
+| `cmx uninstall --keep-data` | Keep local usage and session data. |
+| `cmx uninstall --keep-config` | Keep CMX configuration. |
 
-### `cmx sessions purge`
-
-Delete expired local sessions to free up space and remove stale session data.
-
-```bash
-cmx sessions purge
-```
-
----
-
-### `cmx upgrade`
-
-Check whether a newer version of CMX is available, or download and install the update immediately.
-
-```bash
-cmx upgrade [flags]
-```
-
-**Flags:**
-
-| Flag        | Description                               |
-| ----------- | ----------------------------------------- |
-| `--install` | Download and install the available update |
-
-**Examples:**
-
-```bash
-# Check for an available update
-cmx upgrade
-
-# Download and install the update immediately
-cmx upgrade --install
-```
-
----
-
-### `cmx logout`
-
-Sign out of your CMX account and clear all locally stored credentials from this device.
-
-```bash
-cmx logout
-```
-
----
-
-## Global Flags
-
-These flags are available on every `cmx` command.
-
-| Flag              | Description                     |
-| ----------------- | ------------------------------- |
-| `--help`, `-h`    | Show help for a command         |
-| `--version`, `-v` | Print the installed CMX version |
-
-**Examples:**
-
-```bash
-# Print the installed CMX version
-cmx --version
-
-# Show top-level help
-cmx --help
-
-# Show help for a specific command
-cmx harness --help
-```
-
----
-
-<Note>
-  Not all flags may be listed here. Run `cmx --help` or `cmx <command> --help`
-  for the complete list of flags available in your installed version.
-</Note>
+See [Undo and uninstall](/uninstall) before removal. If you used npm or pnpm, remove the package registration separately after CMX restores clients.

@@ -1,81 +1,33 @@
 ---
-title: "Connect OpenCode to CMX for Automatic Context Compression"
+title: "Connect OpenCode"
 sidebarTitle: "OpenCode"
-description: "Step-by-step guide to routing OpenCode through the CMX local gateway so your AI coding sessions benefit from automatic context compression."
-keywords:
-  - "OpenCode CMX"
-  - "OpenCode proxy"
-  - "OpenCode context compression"
-  - "reduce OpenCode token cost"
-  - "cmx opencode setup"
+description: "Connect an OpenCode provider through CMX without changing native credentials or other provider settings."
 ---
 
-Connect OpenCode to CMX so requests from OpenCode pass through the local gateway. CMX compresses eligible context in the background, reducing your provider token usage across longer coding sessions — without requiring any changes to how you use OpenCode.
+# Connect OpenCode
 
-<Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. OpenCode must already be installed with a configured model provider. CMX does not replace your provider account; you continue managing your provider sign-in through OpenCode as usual.
-</Note>
+OpenCode may have several model providers. CMX routes the one you select. Sign in through OpenCode and choose a model there first:
 
-<Steps>
-  <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+```bash
+opencode auth login
+cmx setup --ask-connect-ready
+cmx providers opencode list
+```
 
-    ```bash
-    cmx setup
-    ```
+The list shows provider IDs, credential readiness, and whether each route is native or connected to CMX. **Listing is read only.** Connect one of the IDs shown:
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
-  </Step>
+```bash
+cmx providers opencode connect <provider-id>
+```
 
-  <Step title="Connect OpenCode">
-    Open the CMX terminal UI and connect OpenCode to your provider:
+For example, the ID might be `opencode`, `opencode-go`, or a provider you configured in OpenCode. Some custom providers need a direct HTTPS endpoint in OpenCode before CMX can connect them. CMX preserves native options and authentication while adding its local route. It supports OpenCode JSON and JSONC configuration and the `OPENCODE_CONFIG` override.
 
-    ```bash
-    cmx
-    ```
+Restart OpenCode, send a request, then check `cmx stats` and `cmx harness verify`.
 
-    1. Navigate to **CONFIG → OpenCode**.
-    2. **Refresh the provider list** to make sure your configured provider appears.
-    3. Select the provider you use in OpenCode.
-    4. Click **Connect**.
-    5. Restart OpenCode so it picks up the new routing through CMX.
+## Return to OpenCode directly
 
-    OpenCode will now send all requests through the CMX gateway instead of directly to your provider.
-  </Step>
+```bash
+cmx providers opencode disconnect <provider-id>
+```
 
-  <Step title="Verify the Connection">
-    Confirm that OpenCode is routing through CMX correctly:
-
-    ```bash
-    cmx harness verify
-    ```
-
-    Send a request from OpenCode as you normally would. Then check CMX for activity:
-
-    ```bash
-    cmx stats
-    ```
-
-    New requests should appear in the stats output. If you see activity, the connection is working.
-  </Step>
-</Steps>
-
-<Note>
-  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
-</Note>
-
-## Troubleshooting
-
-If requests from OpenCode are not appearing in `cmx stats` after a coding session:
-
-1. **Restart OpenCode** — the new routing only takes effect after a full restart.
-2. **Check the selected connection** — open CONFIG → OpenCode in CMX and confirm the correct provider is connected.
-3. **Run the diagnostics command:**
-
-   ```bash
-   cmx doctor
-   ```
-
-For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
-
-Using a tool that is not Codex or OpenCode? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) for instructions on connecting other tools via a custom base URL.
+This restores that provider's native route and retains unrelated OpenCode edits made while routed. To remove all CMX routing from OpenCode, use `cmx harness disable opencode`. Restart OpenCode afterward. If restoration reports a conflict, keep CMX installed and follow [Troubleshooting](/troubleshooting); do not delete its backup files manually.

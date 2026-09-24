@@ -1,0 +1,54 @@
+---
+title: "Model providers and routes"
+sidebarTitle: "Model providers"
+description: "Built-in CMX upstream provider IDs, native credentials, and route selection."
+---
+
+# Model providers and routes
+
+A **model provider** is the service that answers a request from your coding client. A **coding client** is Codex, OpenCode, Claude Code, Aider, Antigravity CLI, or Cline. Connect the client first using its [client guide](/providers/overview). Its normal sign-in or API key remains with that client; CMX does not create a provider account or save provider keys.
+
+CMX has these built-in upstream IDs in the current source:
+
+| ID | Service or route |
+| --- | --- |
+| `openai` | OpenAI API |
+| `anthropic` | Anthropic API |
+| `openrouter` | OpenRouter |
+| `gemini` | Google Gemini API |
+| `cloudcode` | Google CloudCode route used by Antigravity CLI |
+| `deepseek` | DeepSeek |
+| `groq` | Groq |
+| `mistral` | Mistral |
+| `togetherai` | Together AI |
+| `perplexity` | Perplexity |
+| `xai` | xAI |
+| `ollama` | Local Ollama at `127.0.0.1:11434` by default |
+| `commandcode` | Command Code |
+| `opencode` | OpenCode Zen |
+| `opencode-go` | OpenCode Go |
+| `cline` | Cline's API route |
+
+A built-in ID means CMX knows an upstream endpoint shape. It does **not** mean your coding client has credentials, that every model works, or that every protocol is compressed. Credentials and available models come from the native client and provider. Check readiness with `cmx providers <client> list`, then connect an ID that the client actually shows. For example:
+
+```bash
+cmx providers codex list
+cmx providers codex connect api
+```
+
+Here `api` is a **Codex connection ID**, while `openai` is a **CMX upstream ID**. Those names serve different purposes. For OpenCode, the displayed provider ID is the one to pass to `cmx providers opencode connect <provider-id>`.
+
+## Connect a service you already use
+
+1. Configure the service's account, API key, and model **inside your coding client**. Use that client's own sign-in flow. For example, Codex can use OpenAI API or ChatGPT sign-in, Claude Code can use Anthropic access, OpenCode can manage several services, and Cline can use Cline's account or its own provider settings.
+2. Run `cmx providers <client> list`. If your intended provider is missing or reports missing credentials, finish setup in the native client before changing routing.
+3. Run `cmx providers <client> connect <displayed-id>`. Restart the client, make a real request, and check `cmx stats`.
+4. To go direct again, run `cmx providers <client> disconnect <displayed-id>` and restart the client. See [Undo and uninstall](/uninstall).
+
+The same workflow covers OpenRouter, DeepSeek, Groq, Gemini, Mistral, Together AI, Perplexity, xAI, Ollama, Command Code, OpenCode Zen/Go, and other configured services **when the client exposes them**. A CMX upstream ID by itself cannot add a provider to a client. For local Ollama, start Ollama first and configure its native endpoint in a compatible client. Use the [client-specific instructions](/providers/overview) for the settings CMX can manage.
+
+## Custom providers
+
+A provider must have a valid direct endpoint. CMX accepts HTTPS upstreams and HTTP only for exact loopback hosts, such as a local Ollama service. A malformed URL or an endpoint pointing back at CMX is rejected. For OpenCode, configure a custom provider's direct endpoint in OpenCode first, then list and connect it through CMX. Do not put provider API keys in CMX's `config.json`.
+
+The documented compression path covers OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages. Native endpoints for other formats can be proxied without compression. See [Custom clients](/providers/custom-agents) and [How compression works](/how-compression-works).

@@ -1,276 +1,75 @@
 ---
-title: "Uninstall and Purge CMX on Linux, macOS, and Windows"
-sidebarTitle: "Uninstall"
-description: "Complete guide to removing CMX: restore coding-agent routing, stop the gateway, wipe all data, and verify nothing is left behind on any platform."
+title: "Disconnect, stop, or uninstall"
+sidebarTitle: "Undo and uninstall"
+description: "Restore direct client connections safely and remove CMX on Linux, macOS, or Windows."
 ---
 
-CMX ships a full-purge procedure for each supported platform. This page walks you through restoring your coding agents to their original configuration, stopping the CMX gateway, and removing every trace of CMX, including processes, auto-start services, credentials, configuration, session history, cached state, and both standalone and package-manager installs.
+# Disconnect, stop, or uninstall
 
-<Warning>
-  A full purge permanently deletes all local CMX data and preferences. It does not delete your Codex, OpenCode, or AI-provider accounts.
-</Warning>
+Choose the outcome you want:
 
-## Before Removing CMX
+| Goal | Command |
+| --- | --- |
+| Keep CMX but route one provider directly | `cmx providers <client> disconnect <provider-id>` |
+| Keep CMX but disable one supported client | `cmx harness disable <client>` |
+| Restore connected clients and stop the gateway | `cmx stop` |
+| Restore clients and remove CMX's executable, settings, and data | `cmx uninstall` |
 
-Restore your coding agents' original connection settings while the CMX executable and its routing backups are still available.
+Run these as the **same operating-system user** who installed and connected CMX. Use `cmx harness list` to see which clients are routed. Restart each changed coding client so it picks up the direct endpoint.
 
-<Steps>
-  <Step title="Restore agent connections">
-    ```bash
-    cmx harness disable
-    ```
+## What `stop` does
 
-    Restart Codex and OpenCode after this command. If CMX reports that no supported agent is configured, continue. If it reports that it refused to restore an edited configuration, stop and resolve that error before purging. Otherwise the coding agent may keep pointing at the removed local gateway.
-  </Step>
-  <Step title="Sign out and stop the gateway">
-    ```bash
-    cmx logout
-    cmx stop
-    ```
-  </Step>
-</Steps>
+`cmx stop` restores managed client settings to direct routing **before** it shuts down the gateway. If CMX cannot safely restore a client file, it reports the error and leaves the gateway running so that client is not stranded on a dead port. Resolve the conflict in that client's settings, then retry.
 
-<Warning>
-  Never add `|| true` to `cmx harness disable`. A genuine restoration failure needs attention before CMX is deleted.
-</Warning>
+A later `cmx start` can reconnect previously selected routes if the direct client settings have not changed. To remain direct, explicitly disconnect or disable the desired client before stopping. If you are running installer setup again, answer `n` to `cmx setup --ask-connect-ready`; that answer also clears pending automatic reconnection.
 
-## Complete Purge
+CMX restores the client's configuration structure and preserves unrelated user edits made while routed. Formatting such as TOML quote style may differ. CMX does not undo its **own** provider map in `config.json` during client restoration.
 
-Choose the tab for your operating system and run the commands as the same user that installed CMX.
+## Uninstall the standalone binary
+
+Run this in an interactive terminal:
+
+```bash
+cmx uninstall
+```
+
+CMX asks for confirmation, restores the six supported clients where connected, stops the gateway, removes its own service entry if present, deletes its local configuration and data, and removes its executable. If restoration fails, uninstallation stops and retains CMX. Read the reported conflict before retrying. A manually configured [custom client](/providers/custom-agents) must have its base URL restored in that client separately.
+
+For scripted removal after you have reviewed the effects:
+
+```bash
+cmx uninstall --yes
+```
+
+To retain local history or configuration for a later reinstall, add `--keep-data` or `--keep-config`. Without these flags, local usage history and cached summaries are deleted. These options do not delete or alter provider accounts or native client credentials.
+
+## Clean up the installation method
+
+`cmx uninstall` removes the running executable and CMX-managed state. The package manager may still record an installed package, and an installer-created shortcut or PATH entry can remain. After `cmx uninstall` succeeds, do the matching cleanup:
 
 <Tabs>
-  <Tab title="Linux">
-    Run as your normal desktop user:
+  <Tab title="Linux / macOS">
+    If you installed through npm or pnpm, run the matching command:
 
     ```bash
-    cmx harness disable
-    cmx logout
-    cmx stop
-
-    systemctl --user disable --now cmx.service 2>/dev/null || true
-    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/cmx.service"
-    systemctl --user daemon-reload
-    systemctl --user reset-failed
-    pkill -x cmx 2>/dev/null || true
-
-    if command -v npm >/dev/null 2>&1; then
-      npm uninstall --global @compressius/cmx || true
-    fi
-    if command -v pnpm >/dev/null 2>&1; then
-      pnpm remove --global @compressius/cmx || true
-    fi
-
-    sudo rm -f /usr/local/bin/cmx /usr/bin/cmx
-    rm -f "$HOME/.local/bin/cmx"
-
-    rm -rf \
-      "${XDG_CONFIG_HOME:-$HOME/.config}/cmx" \
-      "${XDG_DATA_HOME:-$HOME/.local/share}/cmx" \
-      "${XDG_STATE_HOME:-$HOME/.local/state}/cmx"
-
-    hash -r
+    npm uninstall --global @compressius/cmx
+    # or
+    pnpm remove --global @compressius/cmx
     ```
 
-    **Verify the purge:**
-
-    ```bash
-    if command -v cmx >/dev/null 2>&1; then
-      echo "CMX is still installed at: $(command -v cmx)"
-    else
-      echo "CMX executable removed"
-    fi
-
-    if systemctl --user list-unit-files cmx.service --no-legend 2>/dev/null | grep -q cmx; then
-      echo "CMX systemd service still exists"
-    else
-      echo "CMX systemd service removed"
-    fi
-
-    if pgrep -x cmx >/dev/null; then
-      echo "A CMX process is still running"
-    else
-      echo "No CMX process is running"
-    fi
-    ```
+    For a standalone install, check `command -v cmx` in a **new terminal**. If another copy remains, identify its path before removing it. The normal standalone locations are `/usr/local/bin/cmx` or `~/.local/bin/cmx`.
   </Tab>
-  <Tab title="Mac">
-    First restore routing and stop CMX:
-
-    ```bash
-    cmx harness disable
-    cmx logout
-    cmx stop
-    ```
-
-    Then remove package-manager and standalone installs:
-
-    ```bash
-    pkill -x cmx 2>/dev/null || true
-
-    if command -v npm >/dev/null 2>&1; then
-      npm uninstall --global @compressius/cmx || true
-    fi
-    if command -v pnpm >/dev/null 2>&1; then
-      pnpm remove --global @compressius/cmx || true
-    fi
-
-    sudo rm -f /usr/local/bin/cmx /opt/homebrew/bin/cmx
-    rm -f "$HOME/.local/bin/cmx"
-
-    rm -rf "$HOME/Library/Application Support/cmx"
-
-    hash -r
-    ```
-
-    <Note>
-      CMX does not install a macOS launchd service automatically. If you created one manually, unload and delete only the exact plist you created. Replace `YOUR-CMX-SERVICE.plist` with your real filename; do not delete unrelated LaunchAgent files.
-    </Note>
-
-    ```bash
-    launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/YOUR-CMX-SERVICE.plist" 2>/dev/null || true
-    rm -f "$HOME/Library/LaunchAgents/YOUR-CMX-SERVICE.plist"
-    ```
-
-    **Verify the purge:**
-
-    ```bash
-    if command -v cmx >/dev/null 2>&1; then
-      echo "CMX is still installed at: $(command -v cmx)"
-    else
-      echo "CMX executable removed"
-    fi
-
-    if pgrep -x cmx >/dev/null; then
-      echo "A CMX process is still running"
-    else
-      echo "No CMX process is running"
-    fi
-    ```
-  </Tab>
-  <Tab title="Windows">
-    Open PowerShell as the same Windows user that installed CMX. Restore coding-agent routing first, and stop if it reports a real restoration error:
+  <Tab title="Windows PowerShell">
+    If you installed through npm or pnpm, run the matching command:
 
     ```powershell
-    cmx harness disable
-    cmx logout
-    cmx stop
+    npm uninstall --global @compressius/cmx
+    # or
+    pnpm remove --global @compressius/cmx
     ```
 
-    Then remove processes, packages, files, PATH entry, and shortcut:
-
-    ```powershell
-    Get-Process -Name cmx -ErrorAction SilentlyContinue |
-        Stop-Process -Force
-
-    if (Get-Command npm -ErrorAction SilentlyContinue) {
-        npm uninstall --global @compressius/cmx
-    }
-    if (Get-Command pnpm -ErrorAction SilentlyContinue) {
-        pnpm remove --global @compressius/cmx
-    }
-
-    $cmxInstallDir = Join-Path $env:LOCALAPPDATA 'CMX\bin'
-    $cmxLocalData  = Join-Path $env:LOCALAPPDATA 'cmx'
-    $cmxConfig     = Join-Path $env:APPDATA 'cmx'
-    $cmxShortcut   = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\CMX.lnk'
-
-    Remove-Item -LiteralPath $cmxLocalData -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item -LiteralPath $cmxConfig    -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item -LiteralPath $cmxShortcut  -Force -ErrorAction SilentlyContinue
-
-    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-    if ($userPath) {
-        $cleanPath = (($userPath -split ';') | Where-Object {
-            $_ -and $_.TrimEnd('\') -ine $cmxInstallDir.TrimEnd('\')
-        }) -join ';'
-        [Environment]::SetEnvironmentVariable('Path', $cleanPath, 'User')
-    }
-
-    Remove-Item Alias:cmx -ErrorAction SilentlyContinue
-    ```
-
-    <Note>
-      CMX does not install a Windows service or scheduled task automatically. If you created one manually, remove only the CMX entry you created.
-    </Note>
-
-    For a service named `cmx`:
-
-    ```powershell
-    $service = Get-Service -Name cmx -ErrorAction SilentlyContinue
-    if ($service) {
-        Stop-Service -Name cmx -Force -ErrorAction SilentlyContinue
-        sc.exe delete cmx
-    }
-    ```
-
-    For a scheduled task named `CMX`:
-
-    ```powershell
-    $task = Get-ScheduledTask -TaskName CMX -ErrorAction SilentlyContinue
-    if ($task) {
-        Unregister-ScheduledTask -TaskName CMX -Confirm:$false
-    }
-    ```
-
-    Close PowerShell and open a new window so the updated PATH takes effect.
-
-    **Verify the purge:**
-
-    ```powershell
-    if (Get-Command cmx -ErrorAction SilentlyContinue) {
-        Write-Host "CMX is still installed at:"
-        Get-Command cmx | Select-Object -ExpandProperty Source
-    } else {
-        Write-Host "CMX executable removed"
-    }
-
-    if (Get-Process -Name cmx -ErrorAction SilentlyContinue) {
-        Write-Host "A CMX process is still running"
-    } else {
-        Write-Host "No CMX process is running"
-    }
-    ```
+    The standalone PowerShell installer puts CMX in `%LOCALAPPDATA%\CMX\bin`, adds that directory to your **user** PATH, and creates a CMX Start menu shortcut. After uninstalling, remove the shortcut and that exact PATH entry if they remain. Open a new PowerShell window and run `Get-Command cmx -ErrorAction SilentlyContinue` to check for another installed copy. If the executable was renamed to `cmx.exe.old` because Windows had it open, delete that file after closing the process.
   </Tab>
 </Tabs>
 
-## Reinstall CMX
-
-<CodeGroup>
-
-```bash Linux / macOS
-curl -sSfL https://compressi.us/install.sh | sh
-```
-
-```powershell Windows
-Invoke-WebRequest -UseBasicParsing 'https://compressi.us/install.ps1' -OutFile "$env:TEMP\cmx-install.ps1"
-powershell -NoProfile -ExecutionPolicy Bypass -File "$env:TEMP\cmx-install.ps1"
-```
-
-```bash npm
-npm install --global @compressius/cmx
-```
-
-```bash pnpm
-pnpm add --global @compressius/cmx
-```
-
-</CodeGroup>
-
-After reinstalling, restart your coding agent and verify the full path:
-
-```bash
-cmx --version
-cmx doctor
-cmx harness verify
-cmx status
-```
-
-Then send a real request through Codex or OpenCode and confirm CMX recorded it:
-
-```bash
-cmx stats
-```
-
-<Tip>
-  A healthy status endpoint or successful setup alone does not prove that coding-agent traffic is flowing through CMX. A real request followed by new activity in `cmx stats` is the relevant check.
-</Tip>
+Do not force-kill the gateway or delete client backup files before restoration. If `cmx uninstall` reports a conflict, follow [Troubleshooting](/troubleshooting) or contact support with the error text, not the client config or API keys.
