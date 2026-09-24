@@ -28,3 +28,7 @@ npx mint dev
 Check internal links and the platform-specific commands you change. A documentation edit in this local clone is not published until it is reviewed and deployed through the repository's normal workflow.
 
 For errors, open an issue or pull request in [this repository](https://github.com/compressius/docs). Do not put provider keys, private prompts, or client configuration files in an issue.
+
+## License
+
+CMX software is distributed under the [Proprietary Gratis License](LICENSE). The site’s EULA explains those terms; the LICENSE file is the canonical text. Earlier revisions of this documentation repository carried an MIT license.
