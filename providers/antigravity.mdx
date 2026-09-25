@@ -1,78 +1,26 @@
 ---
-title: "Connect Antigravity to CMX for Automatic Context Compression"
-sidebarTitle: "Antigravity"
-description: "Step-by-step guide to routing Antigravity through the CMX local gateway so your AI coding sessions benefit from automatic context compression."
-keywords:
-  - "Antigravity CMX"
-  - "Antigravity proxy"
-  - "Antigravity context compression"
-  - "reduce Antigravity token cost"
-  - "cmx antigravity setup"
+title: "Connect Antigravity CLI"
+sidebarTitle: "Antigravity CLI"
+description: "Connect Google's agy CLI through CMX and safely restore its original executable."
 ---
 
-Connect Antigravity to CMX so requests from Antigravity pass through the local gateway. CMX compresses eligible context in the background, reducing your provider token usage across longer coding sessions, without requiring any changes to how you use Antigravity.
+# Connect Antigravity CLI
 
-<Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. Antigravity must already be installed with a configured model provider. CMX does not replace your provider account; you continue managing your provider sign-in through Antigravity as usual.
-</Note>
+This integration is for the `agy` command-line client. Install the official Antigravity CLI and complete its normal first-run sign-in before connecting. It is separate from any graphical Antigravity application.
 
-<Steps>
-  <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+```bash
+agy
+cmx setup --ask-connect-ready
+cmx harness list
+cmx harness enable antigravity
+```
 
-    ```bash
-    cmx setup
-    ```
+CMX places a reversible wrapper around `agy` so the CLI uses local CloudCode and Gemini routes. It keeps the original executable as a `.real` companion. Start a new `agy` process, send a request, then check `cmx stats`. The provider list may show Antigravity as ready based on the executable alone; a real request is the sign-in check.
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
-  </Step>
-  <Step title="Connect Antigravity">
-    Open the CMX terminal UI and connect Antigravity to your provider:
+## Return to the original CLI
 
-    ```bash
-    cmx
-    ```
+```bash
+cmx harness disable antigravity
+```
 
-    1. Navigate to **CONFIG → Antigravity**.
-    2. **Refresh the provider list** to make sure your configured provider appears.
-    3. Select the provider you use in Antigravity.
-    4. Click **Connect**.
-    5. Restart Antigravity so it picks up the new routing through CMX.
-
-    Antigravity will now send all requests through the CMX gateway instead of directly to your provider.
-  </Step>
-  <Step title="Verify the Connection">
-    Confirm that Antigravity is routing through CMX correctly:
-
-    ```bash
-    cmx harness verify
-    ```
-
-    Send a request from Antigravity as you normally would. Then check CMX for activity:
-
-    ```bash
-    cmx stats
-    ```
-
-    New requests should appear in the stats output. If you see activity, the connection is working.
-  </Step>
-</Steps>
-
-<Note>
-  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
-</Note>
-
-## Troubleshooting
-
-If requests from Antigravity are not appearing in `cmx stats` after a coding session:
-
-1. **Restart Antigravity** so the new routing takes effect.
-2. **Check the selected connection** by opening CONFIG → Antigravity in CMX and confirming the correct provider is connected.
-3. **Run the diagnostics command:**
-   ```bash
-   cmx doctor
-   ```
-
-For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
-
-Using a tool that is not listed under Providers? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) for instructions on connecting other tools via a custom base URL, or [suggest a provider](/providers/suggest-provider) for us to integrate next.
+This restores the original `agy` executable. `cmx stop` and `cmx uninstall` also restore wrapped clients before shutting down or removing CMX. If restoration fails, keep CMX installed and resolve the reported error before deleting any wrapper or `.real` file.

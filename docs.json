@@ -17,7 +17,7 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Get started",
             "pages": [
               "introduction",
               "quickstart",
@@ -26,18 +26,21 @@
             ]
           },
           {
-            "group": "Providers",
+            "group": "Clients and providers",
             "pages": [
+              "providers/overview",
               "providers/codex",
               "providers/opencode",
+              "providers/claude-code",
+              "providers/aider",
               "providers/antigravity",
               "providers/cline",
-              "providers/chatgpt-desktop",
+              "model-providers",
               "providers/suggest-provider"
             ]
           },
           {
-            "group": "Setup & Configuration",
+            "group": "Setup and configuration",
             "pages": [
               "configuration",
               "providers/custom-agents"
@@ -52,7 +55,7 @@
             ]
           },
           {
-            "group": "CLI Reference",
+            "group": "CLI reference",
             "pages": [
               "cli-reference"
             ]
@@ -85,7 +88,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/compressius/cmx"
+      "github": "https://github.com/compressius/cmx2"
     }
   },
   "contextual": {
@@ -100,7 +103,7 @@
       "vscode"
     ]
   },
-  "description": "Compressius Maximus (CMX) is a free, local AI gateway that compresses coding-agent context, cutting input tokens and lowering your provider bill.",
+  "description": "Compressius Maximus (CMX) is a local gateway for coding clients that can reduce eligible context and help you understand token usage.",
   "background": {
     "decoration": "windows"
   },

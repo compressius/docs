@@ -1,70 +1,47 @@
 ---
-title: "CMX Frequently Asked Questions: Pricing, Privacy, and Agents"
+title: "Frequently asked questions"
 sidebarTitle: "FAQ"
-description: "Answers to the most common questions about CMX: how it works, privacy, data handling, supported agents, and whether it will always reduce your bill."
-keywords:
-  - "CMX FAQ"
-  - "CMX pricing"
-  - "CMX privacy"
-  - "CMX supported agents"
-  - "is CMX free"
-  - "AI gateway questions"
+description: "Short answers about accounts, clients, savings, privacy, routing, and removal."
 ---
 
-Common questions about CMX answered. If you don't find what you need here, check the documentation or contact support.
+# Frequently asked questions
 
-<AccordionGroup>
-  <Accordion title="What is Compressius Maximus (CMX)?">
-    Compressius Maximus (CMX) is a free tool for AI coding agents. It runs a local gateway that compresses the context your agent sends to your model provider. Requests pass through unchanged until a session grows large enough to be worth compressing.
-  </Accordion>
+## Do I need a CMX account?
 
-  <Accordion title="Is CMX free?">
-    Yes. Compressius Maximus is free to use, with no subscriptions or paid plans. Your model provider's normal usage charges still apply.
-  </Accordion>
+No. You can use the local gateway without one. `cmx login` adds account-linked dashboard statistics. Your coding client still needs its own provider sign-in or API key.
 
-  <Accordion title="How does CMX reduce token usage?">
-    Once a session passes the configured minimum size, CMX asks your model to summarize eligible older context. CMX checks each proposal for protected calls, estimated savings, and recent-context preservation, then applies accepted summaries to later requests.
-  </Accordion>
+## Which coding clients can CMX set up for me?
 
-  <Accordion title="Which coding agents and model providers work with CMX?">
-    Codex and OpenCode are verified coding agents. Other tools work if they accept a custom API base URL and speak OpenAI Chat Completions, OpenAI Responses, or Anthropic Messages. The [agent setup guides](/providers/codex) list verified setups and known limitations.
-  </Accordion>
+Codex, OpenCode, Claude Code, Aider, Antigravity CLI (`agy`), and Cline CLI. See [Supported clients](/providers/overview). ChatGPT Desktop is not a supported coding-client integration.
 
-  <Accordion title="Does compression remove information?">
-    Yes. Summarization is lossy, so a summary can omit details the model did not include. CMX reduces the risk by preserving recent context, by never summarizing protected tool calls or their results, and by excluding opaque content such as reasoning blocks from compression proposals.
-  </Accordion>
+## Does CMX support my model provider?
 
-  <Accordion title="Where does my data go?">
-    Your data is handled in three distinct places:
+CMX has [built-in upstream IDs](/model-providers) for common services and can route configured custom endpoints. A route alone does not supply credentials or guarantee that a provider's protocol is compressed. Check the native client's provider list and send a real request.
 
-    - **On your device:** session state, compression decisions, aggregate counters, and provider credentials — kept in memory and never written to disk.
-    - **Your configured model provider:** prompts, context, and responses are sent as part of normal operation. Compression changes what is sent, not where it goes.
-    - **CMX services:** signed aggregate usage counters for authenticated accounts only — never prompts, responses, code, or session content.
-  </Accordion>
+## Will installation change my client settings without asking?
 
-  <Accordion title="Do I need an account?">
-    Yes. CMX requires an account, and there is no guest mode. Signing in pairs your device with the dashboard. Creating an account is free.
-  </Accordion>
+The standalone Unix and Windows installers run `cmx setup --ask-connect-ready`. Answer `y` to connect ready providers, or `n`/Enter to leave them direct. If no interactive input is available, setup reports an error. You can later use `cmx providers <client> list` and `cmx providers <client> connect <id>` or the TUI **CONFIG** screen.
 
-  <Accordion title="Will CMX always reduce my API bill?">
-    No. Savings depend on your workload, session length, compression overhead, and your provider's caching. CMX approves compression only when its cost checks estimate a net saving, but a lower bill is never guaranteed.
-  </Accordion>
+## What happens when I stop CMX?
 
-  <Accordion title="Does CMX work without an internet connection?">
-    CMX compression works locally without internet access. Account sync, dashboard access, and update checks require an internet connection. If CMX Cloud is unavailable, local compression continues working — your coding sessions are not interrupted.
-  </Accordion>
+`cmx stop` restores managed clients to direct settings before shutting down. If restoration fails, the gateway remains running and reports the conflict. A later `cmx start` may reconnect previously selected routes if their direct settings are unchanged. To stay direct, explicitly disconnect or disable the client. See [Undo and uninstall](/uninstall).
 
-  <Accordion title="Can I see what was compressed?">
-    CMX does not expose the exact content of individual compression proposals. You can see aggregate statistics in `cmx stats` and in the dashboard, which show processed tokens, estimated savings, and cache rates.
+## Will CMX always reduce my provider bill?
 
-    ```bash
-    cmx stats
-    ```
+No. Savings depend on session length, eligibility, model pricing, provider caching, and the extra summary call. `cmx stats` reports estimates, not an invoice. Short sessions may show no compression.
 
-    Raw request logging is opt-in and local only. You can enable it for debugging on your own machine — it is never sent to CMX Cloud.
+## Does summarization lose information?
 
-    ```bash
-    cmx logs status
-    ```
-  </Accordion>
-</AccordionGroup>
+It can. CMX protects instructions, recent context, protected tool exchanges, and opaque content, and validates each proposed summary. It cannot guarantee that a model-generated summary retains every detail. See [How compression works](/how-compression-works).
+
+## Where do my prompts and code go?
+
+Requests pass from your client through the local CMX gateway to your chosen model provider. CMX Cloud receives aggregate usage metrics only; it does not receive prompts, responses, or sessions. CMX stores local usage records and cached summaries. The optional lossless vault can also store original pruned content locally. See [Security and data handling](/security).
+
+## Does CMX store my provider API key?
+
+No. CMX does not persist or log provider API keys. The native client remains responsible for its own credential storage. Do not add keys to CMX's `config.json`.
+
+## How do I remove everything?
+
+Run `cmx uninstall` as the user who installed it. It restores managed clients before removing CMX. Then remove an npm/pnpm package registration or Windows PATH/shortcut entry if applicable. See [Undo and uninstall](/uninstall).

@@ -1,0 +1,25 @@
+---
+title: "Connect Claude Code"
+sidebarTitle: "Claude Code"
+description: "Connect Claude Code's Anthropic API route through the local CMX gateway."
+---
+
+# Connect Claude Code
+
+Install Claude Code and configure its Anthropic access first. CMX detects its settings and can set `ANTHROPIC_BASE_URL` to the local gateway. The documented ready check looks for `ANTHROPIC_API_KEY` in Claude Code's environment; a browser sign-in alone may not appear as ready in `cmx providers claude list`.
+
+```bash
+cmx setup --ask-connect-ready
+cmx providers claude list
+cmx harness enable claude
+```
+
+Keep your provider key in Claude Code's native environment, never in CMX configuration. Restart Claude Code, send a request, then compare `cmx stats` before and after. `cmx harness verify` checks that the client points to a live gateway.
+
+## Return to a direct connection
+
+```bash
+cmx harness disable claude
+```
+
+CMX restores the pre-connect settings while preserving unrelated edits when it can reconcile them. Restart Claude Code afterward. If your Claude Code account uses a subscription login rather than an API key, test a real request before relying on this route; native authentication behavior can differ by account and client version.

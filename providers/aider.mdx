@@ -1,0 +1,25 @@
+---
+title: "Connect Aider"
+sidebarTitle: "Aider"
+description: "Route Aider's OpenAI-compatible API traffic through CMX and restore its original base URL."
+---
+
+# Connect Aider
+
+CMX's Aider integration changes the OpenAI-compatible API base in Aider's configuration. Install Aider and provide its model provider credential through Aider's normal environment first. `cmx providers aider list` reports readiness when it sees `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`; the configured OpenAI-compatible route is what CMX changes.
+
+```bash
+cmx setup --ask-connect-ready
+cmx providers aider list
+cmx harness enable aider
+```
+
+CMX normally uses `~/.aider.conf.yml` and also recognizes `AIDER_CONFIG`. Start a new Aider process, send a request, then check `cmx stats`. Aider models that use a different API base or protocol need separate verification.
+
+## Return to a direct connection
+
+```bash
+cmx harness disable aider
+```
+
+Restart Aider after restoring. If you need to stop the gateway as well, use `cmx stop`; it restores active client routes before stopping.

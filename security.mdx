@@ -1,64 +1,37 @@
 ---
-title: "CMX Security Model: Local Gateway and Privacy Practices"
+title: "Security and data handling"
 sidebarTitle: "Security"
-description: "How CMX keeps your code and credentials safe: local-only gateway, in-memory API keys, aggregate-only telemetry, and signed release artifacts."
-keywords:
-  - "CMX security"
-  - "CMX privacy"
-  - "local AI gateway security"
-  - "in-memory API keys"
-  - "AI proxy privacy"
-  - "signed release artifacts"
+description: "Understand CMX's local gateway, provider credentials, local storage, and cloud data boundary."
 ---
 
-CMX is designed so the sensitive parts of your coding session never leave your machine. Here's exactly what stays local, what leaves the device, and how release artifacts are protected.
+# Security and data handling
 
-## Threat Model
+CMX is a local gateway, but a model request still travels to the model provider you selected. The data path is:
 
-CMX sits between a coding agent and a model provider, which makes it a tempting place to intercept sensitive data. We address that by keeping the data plane local and keeping the cloud surface as small as possible. The sections below describe each boundary and the control that governs it.
-
-## Local-Only Gateway
-
-The gateway binds strictly to `127.0.0.1` and rejects any attempt to configure a public listening address. Provider requests are forwarded from your machine directly to the provider you selected — CMX Cloud is never in the request path.
-
-This means the compression logic, your prompts, and your model responses are processed entirely on the local network interface. No third-party infrastructure sits between your machine and your provider.
-
-## API Keys Stay in Memory
-
-Provider API keys are forwarded in process memory for the lifetime of a request. CMX does not write them to disk, does not log them, and does not send them to CMX Cloud.
-
-If you stop CMX or reboot your machine, no key material persists. You may be asked to re-enter credentials through your coding agent the next time a connection is established.
-
-## Device Pairing
-
-Authenticating the gateway with your CMX dashboard uses Ed25519 key pairs. The private key stays on your device — only signed payloads and the public key are ever exchanged. Dashboard sessions are stored in `HttpOnly`, `Secure`, `SameSite=Lax` cookies to reduce exposure to cross-site attacks.
-
-## No Content Logging
-
-CMX does not persist or log your prompts, source code, or model responses. They are sent only to the model provider you configure; CMX Cloud never receives them.
-
-Raw request logging is opt-in, local only, and intended for debugging on your own machine. It is disabled by default. You can check whether it is currently active with:
-
-```bash
-cmx logs status
+```text
+Coding client → CMX on loopback → selected model provider
 ```
 
-## Aggregate Telemetry Only
+CMX Cloud is not in that request path. It receives aggregate usage metrics, not prompts, responses, source code, session data, or provider API keys.
 
-The only data that reaches CMX Cloud is a signed, allowlisted set of aggregate counters — for example, processed tokens, estimated saved tokens, and cache rates. No content — prompts, code, or responses — is included in these counters. See the [Privacy Policy](https://compressi.us/privacy) for the full list of synced fields.
+## Gateway access
 
-These counters are what populate your account dashboard. They are associated with your authenticated account and signed before transmission.
+The gateway binds to `127.0.0.1` by default and rejects non-loopback listen addresses. Local management routes also require an owner token and validate Host and Origin. Binding to loopback does not turn a provider API into a public endpoint.
 
-## Signed Updates and Downloads
+## Credentials
 
-Update checks are optional and never install automatically. Running `cmx upgrade` reports whether an update is available without changing anything. To actually install an update, you must explicitly run:
+Your coding client owns provider sign-in. CMX forwards provider credentials in memory for requests and does not persist or log provider API keys. The native client may store its own authentication files according to that client's design; CMX does not delete them on logout or uninstall. `cmx login` is a separate, optional CMX account sign-in for the dashboard.
 
-```bash
-cmx upgrade --install
-```
+Do not place provider API keys in `config.json`, terminal screenshots, issue reports, or support emails.
 
-Release artifacts are published alongside a `SHA256SUMS` file so you can verify any download before running it. This applies to all platform builds available from the downloads page and the GitHub releases page.
+## What is stored locally
 
-## Responsible Disclosure
+CMX keeps local configuration, usage and session records, compression metadata, and cached summaries in its user data directory. It does not offer raw request logging; `cmx logs` describes the available diagnostics. The **lossless content vault** is disabled by default. If you enable it, selected original tool content removed by local optimization is stored in the local SQLite database. `cmx vault list` and `cmx vault show <id>` can inspect that content; `cmx vault prune` enforces its retention count. Treat the data directory as sensitive and use owner-only filesystem permissions.
 
-Please report suspected vulnerabilities privately to [hello@compressi.us](mailto:hello@compressi.us) before public disclosure. Avoid including live secrets or user content in your report. We will confirm receipt and work with you on a fix and a coordinated disclosure timeline.
+`cmx uninstall` removes CMX's local data by default. `--keep-data` retains it. See [Undo and uninstall](/uninstall).
+
+## Cloud and updates
+
+Local proxy use does not require a CMX account. An account is needed for account-linked dashboard statistics. Cloud synchronization uses aggregate counters only. Update checks do not install a new binary automatically; `cmx upgrade --install` is an explicit action. Published binary downloads include SHA-256 checksums. A checksum verifies a file against the published checksum manifest; it is not a code-signing claim.
+
+For suspected vulnerabilities, contact [hello@compressi.us](mailto:hello@compressi.us) without sending live credentials or private conversation content.

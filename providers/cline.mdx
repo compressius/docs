@@ -1,78 +1,25 @@
 ---
-title: "Connect Cline to CMX for Automatic Context Compression"
+title: "Connect Cline"
 sidebarTitle: "Cline"
-description: "Step-by-step guide to routing Cline through the CMX local gateway so your AI coding sessions benefit from automatic context compression."
-keywords:
-  - "Cline CMX"
-  - "Cline proxy"
-  - "Cline context compression"
-  - "reduce Cline token cost"
-  - "cmx cline setup"
+description: "Connect Cline CLI or detected Cline settings to CMX and restore the native provider route."
 ---
 
-Connect Cline to CMX so requests from the Cline VS Code extension pass through the local gateway. CMX compresses eligible context in the background, reducing your provider token usage across longer coding sessions, without requiring any changes to how you use Cline.
+# Connect Cline
 
-<Note>
-  **Prerequisites:** CMX must be installed and signed in on your device. Cline must already be installed in VS Code with a configured model provider. CMX does not replace your provider account; you continue managing your provider sign-in through Cline as usual.
-</Note>
+CMX detects Cline provider settings, including the CLI's `~/.cline/data/settings/providers.json` path and supported editor storage locations. Install Cline and sign in through Cline first. For the CLI, use `cline auth`; for the VS Code extension, use its own sign-in or provider settings.
 
-<Steps>
-  <Step title="Set Up CMX">
-    Run the guided setup command to sign in, start the local gateway, and detect your coding agents:
+```bash
+cmx setup --ask-connect-ready
+cmx providers cline list
+cmx harness enable cline
+```
 
-    ```bash
-    cmx setup
-    ```
+CMX changes Cline's selected provider base URL and routing header. Reload your VS Code window or restart the Cline CLI, send a request, and check `cmx stats`. Provider availability and API behavior depend on the Cline mode you use; verify a real request before relying on the integration.
 
-    Follow the browser sign-in prompt. Once setup completes, the CMX gateway starts at `127.0.0.1:17322` and is ready to accept connections.
-  </Step>
-  <Step title="Connect Cline">
-    Open the CMX terminal UI and connect Cline to your provider:
+## Return to Cline directly
 
-    ```bash
-    cmx
-    ```
+```bash
+cmx harness disable cline
+```
 
-    1. Navigate to **CONFIG → Cline**.
-    2. **Refresh the provider list** to make sure your configured provider appears.
-    3. Select the provider you use in Cline.
-    4. Click **Connect**.
-    5. Reload the VS Code window so Cline picks up the new routing through CMX.
-
-    Cline will now send all requests through the CMX gateway instead of directly to your provider.
-  </Step>
-  <Step title="Verify the Connection">
-    Confirm that Cline is routing through CMX correctly:
-
-    ```bash
-    cmx harness verify
-    ```
-
-    Send a request from Cline as you normally would. Then check CMX for activity:
-
-    ```bash
-    cmx stats
-    ```
-
-    New requests should appear in the stats output. If you see activity, the connection is working.
-  </Step>
-</Steps>
-
-<Note>
-  Short conversations may show little or no compression. Savings grow with longer sessions as eligible older context accumulates. Compare stats across a full coding session to get a representative picture.
-</Note>
-
-## Troubleshooting
-
-If requests from Cline are not appearing in `cmx stats` after a coding session:
-
-1. **Reload the VS Code window** so the new routing takes effect.
-2. **Check the selected connection** by opening CONFIG → Cline in CMX and confirming the correct provider is connected.
-3. **Run the diagnostics command:**
-   ```bash
-   cmx doctor
-   ```
-
-For more detailed guidance, see the [troubleshooting guide](/troubleshooting). If the issue persists, contact support with your CMX version, OS, and a description of what happened.
-
-Using a tool that is not listed under Providers? See [Connect Any OpenAI or Anthropic Agent to CMX](/providers/custom-agents) for instructions on connecting other tools via a custom base URL, or [suggest a provider](/providers/suggest-provider) for us to integrate next.
+Reload the editor or restart Cline again. CMX restores the pre-connect client settings when the restore can be completed. If Cline changed the same routing field in the meantime, follow [Troubleshooting](/troubleshooting) before uninstalling CMX.

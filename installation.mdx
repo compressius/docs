@@ -1,90 +1,57 @@
 ---
-title: "Install CMX on Linux, macOS, or Windows — All Methods"
+title: "Install CMX"
 sidebarTitle: "Installation"
-description: "All ways to install CMX: npm, pnpm, curl installer, and standalone binaries for Linux, macOS, and Windows on x64 and ARM64. No subscription required."
-keywords:
-  - "install CMX"
-  - "CMX Linux"
-  - "CMX macOS"
-  - "CMX Windows"
-  - "npm install cmx"
-  - "pnpm cmx"
-  - "cmx binary"
-  - "ARM64"
-  - "x64"
+description: "Install CMX on Linux, macOS, or Windows and understand the connection prompt."
 ---
 
-CMX supports Windows, macOS, and Linux on both x64 and ARM64. Choose the install method that fits your setup: a package manager if you already have Node.js, or a standalone binary if you prefer no runtime dependency.
+# Install CMX
 
-## Package Manager Install
+CMX provides binaries for Linux, macOS, and Windows on x64 and ARM64. Install the coding client you want to use separately, and sign in to its model provider through that client.
 
-Package manager installs require **Node.js 18 or later** and either npm or pnpm. This method keeps CMX on your existing update workflow.
-
-<CodeGroup>
-  ```bash npm
-  npm install --global @compressius/cmx
-  ```
-
-  ```bash pnpm
-  pnpm add --global @compressius/cmx
-  ```
-</CodeGroup>
-
-Each package downloads the matching release binary for your platform and verifies its SHA-256 checksum before exposing the `cmx` command.
-
-## Standalone Installer (No Node.js Required)
-
-Use the standalone installer if you don't have Node.js or prefer a self-contained binary. The installer downloads the correct binary for your platform, verifies its checksum, and places it on your PATH.
+## Standalone installer
 
 <Tabs>
-  <Tab title="Linux">
-    ```sh
+  <Tab title="Linux and macOS">
+    ```bash
     curl -sSfL https://compressi.us/install.sh | sh
     ```
 
-    The script detects your architecture (x86\_64 or arm64), downloads the matching binary, verifies the SHA-256 checksum, and installs to `/usr/local/bin` or `~/.local/bin` depending on write permissions. After installation, `cmx setup` runs automatically unless you pass `CMX_SKIP_START=1`.
+    The script downloads the matching release binary, checks it against `SHA256SUMS`, and installs to `/usr/local/bin` when writable or `~/.local/bin` otherwise. It then runs `cmx setup --ask-connect-ready` unless `CMX_SKIP_START=1` is set.
   </Tab>
-
-  <Tab title="Mac">
-    ```sh
-    curl -sSfL https://compressi.us/install.sh | sh
-    ```
-
-    The script detects Intel or Apple Silicon, downloads the matching binary, verifies the SHA-256 checksum, and installs to `/usr/local/bin` or `~/.local/bin`. After installation, `cmx setup` runs automatically unless you pass `CMX_SKIP_START=1`.
-  </Tab>
-
-  <Tab title="Windows">
-    Run the following command in a PowerShell terminal:
-
+  <Tab title="Windows PowerShell">
     ```powershell
     iwr -useb https://compressi.us/install.ps1 | iex
     ```
 
-    The script downloads the binary for your architecture, verifies its SHA-256 checksum, installs to `%LOCALAPPDATA%\CMX\bin`, adds that directory to your user PATH, and creates a Start menu shortcut. After installation, `cmx setup` runs automatically.
-
-    Prefer a graphical installer? Download the `.exe` directly:
-
-    - [Windows x64 installer](https://compressi.us/downloads/cmx-setup-windows-amd64.exe) for Intel and AMD PCs
-    - [Windows ARM64 installer](https://compressi.us/downloads/cmx-setup-windows-arm64.exe) for Windows on ARM
+    The script verifies the binary checksum, installs to `%LOCALAPPDATA%\CMX\bin`, adds that folder to your user PATH, and creates a Start menu shortcut. It then runs `cmx setup --ask-connect-ready`. Open a new terminal if `cmx` is not found immediately.
   </Tab>
 </Tabs>
 
-## Verify the Installation
+Run the installer from an interactive terminal. It lists ready coding clients and asks whether to configure all of them now. Answer `y` to connect the listed clients or `n`/Enter to leave them direct. After `n`, the terminal shows how to connect later through the CLI or **CONFIG** in the TUI. If a piped or detached installer has no readable terminal, setup fails visibly; retry with `cmx setup --ask-connect-ready` in a terminal.
 
-After installing, open a new terminal and run:
+The prompt concerns **client routing**, not CMX account registration. A CMX account is optional for local use. Provider sign-in remains in the coding client.
+
+## npm or pnpm
+
+If you already use Node.js, install the published package:
+
+```bash
+npm install --global @compressius/cmx
+# or
+pnpm add --global @compressius/cmx
+```
+
+The package fetches the matching published binary and verifies its checksum. Follow it with `cmx setup --ask-connect-ready` if setup has not run. Check the package's current Node.js requirement with your package manager; the binary itself does not require Node.js.
+
+## Verify and connect
 
 ```bash
 cmx --version
+cmx status
+cmx harness list
 ```
 
-If the command is not found, the install directory may not be on your PATH yet. Open a new terminal window first, your shell may not have picked up PATH changes from the installer. If it's still missing, add the install directory manually:
-
-```bash
-# Example for ~/.local/bin (Linux / macOS)
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-Add that line to your `~/.bashrc` or `~/.zshrc` to make it permanent.
+Use the [quickstart](/quickstart) to connect one client and confirm real traffic. To keep clients direct, answer `n` at installation or use [Undo and uninstall](/uninstall) later.
 
 ## Uninstall
 
@@ -94,12 +61,6 @@ To remove CMX, run:
 cmx uninstall
 ```
 
-The command restores your coding agents to their direct connections, stops the gateway, removes background services, and deletes CMX configuration, data, and the executable. See [Uninstall](/uninstall) for flags and the platform-specific manual purge fallback.
+The command restores your coding agents to their direct connections, stops the gateway, removes background services, and deletes CMX configuration, data, and the executable. See [Undo and uninstall](/uninstall) for flags and the platform-specific cleanup.
 
-<Note>
-  After installing, run `cmx setup` to sign in with your free account and connect your coding agent. See the [Quick Start](/quickstart) guide for a full walkthrough.
-</Note>
-
-## Nightly Builds
-
-Prefer to test unreleased fixes? Install the `@nightly` tag via npm or pnpm, or grab a prerelease from the [releases page](https://github.com/compressius/cmx/releases). Nightly builds may contain breaking changes, so stick with stable for production work.
+<Note>The documented behavior follows the current source. Check `cmx --version` when using an older published release; options and supported clients can differ.</Note>
