@@ -43,6 +43,8 @@ cmx uninstall --yes
 
 To retain local history or configuration for a later reinstall, add `--keep-data` or `--keep-config`. Without these flags, local usage history and cached summaries are deleted. These options do not delete or alter provider accounts or native client credentials.
 
+`cmx remove` and `cmx rm` are aliases for `cmx uninstall`, and `--force` (`-f`) is an alias for `--yes` (`-y`). Restart each coding agent after uninstalling so it picks up its restored configuration.
+
 ## Clean up the installation method
 
 `cmx uninstall` removes the running executable and CMX-managed state. The package manager may still record an installed package, and an installer-created shortcut or PATH entry can remain. After `cmx uninstall` succeeds, do the matching cleanup:

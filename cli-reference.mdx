@@ -40,7 +40,7 @@ cmx harness verify
 | `cmx providers <client> signin <id>` | Print the native sign-in guidance for that provider. |
 | `cmx harness enable [client]` | Connect a detected client; with no client, acts on detected clients. |
 | `cmx harness disable [client]` | Restore a detected client's direct settings; with no client, acts on detected clients. |
-| `cmx harness verify` | Check managed routes and report problems. A real client request is still needed to prove traffic flows. |
+| `cmx harness verify` | Check managed routes and report problems. Exits with an error if a client still points at a stopped gateway; run `cmx stop` to restore those clients to their direct connections. A real client request is still needed to prove traffic flows. |
 
 See [Supported clients](/providers/overview) for connection IDs and readiness limits. The `providers` ID belongs to the **client**; it is not necessarily the same as CMX's [upstream provider ID](/model-providers).
 
@@ -60,6 +60,10 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | `cmx sessions purge` | Delete expired local sessions. |
 | `cmx vault list`, `show <id>`, `prune` | Inspect or prune local lossless vault entries if enabled. |
 
+<Note>
+  Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
+</Note>
+
 ## Updates and removal
 
 | Command | Action |
@@ -70,5 +74,7 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | `cmx uninstall --yes` | Run the same removal without an interactive confirmation. |
 | `cmx uninstall --keep-data` | Keep local usage and session data. |
 | `cmx uninstall --keep-config` | Keep CMX configuration. |
+
+`cmx remove` and `cmx rm` are aliases for `cmx uninstall`, and `--force` (`-f`) is an alias for `--yes` (`-y`).
 
 See [Undo and uninstall](/uninstall) before removal. If you used npm or pnpm, remove the package registration separately after CMX restores clients.

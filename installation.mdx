@@ -53,4 +53,14 @@ cmx harness list
 
 Use the [quickstart](/quickstart) to connect one client and confirm real traffic. To keep clients direct, answer `n` at installation or use [Undo and uninstall](/uninstall) later.
 
+## Uninstall
+
+To remove CMX, run:
+
+```bash
+cmx uninstall
+```
+
+The command restores your coding agents to their direct connections, stops the gateway, removes background services, and deletes CMX configuration, data, and the executable. See [Undo and uninstall](/uninstall) for flags and the platform-specific cleanup.
+
 <Note>The documented behavior follows the current source. Check `cmx --version` when using an older published release; options and supported clients can differ.</Note>

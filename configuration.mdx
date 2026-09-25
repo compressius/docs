@@ -57,3 +57,5 @@ cmx stop       # restore managed client routes, then stop
 ```
 
 `cmx start` launches a detached process. It does not automatically install a login service. If restoration fails during `cmx stop`, CMX keeps the gateway running and reports the client conflict.
+
+While the gateway is stopped, your connected coding agents keep working on their direct connections. The next `cmx start` routes them through CMX again, as long as their configuration hasn't changed since the stop.
