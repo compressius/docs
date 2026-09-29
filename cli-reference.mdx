@@ -57,12 +57,37 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | `cmx doctor` | Run installation and connectivity checks. |
 | `cmx logs` | Explain the available diagnostics; CMX does not capture raw prompts or responses. |
 | `cmx permissions` | Enforce owner-only permissions on CMX directories. |
-| `cmx sessions purge` | Delete expired local sessions. |
+| `cmx sessions` | Inspect and delete stored local compression sessions. See [Local sessions](#local-sessions). |
 | `cmx vault list`, `show <id>`, `prune` | Inspect or prune local lossless vault entries if enabled. |
 
 <Note>
   Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
 </Note>
+
+## Local sessions
+
+CMX stores each client conversation it routes as a local compression session. Use `cmx sessions` to review what CMX has kept, check how compression applied to a conversation, or remove stored history.
+
+| Command | Action |
+| --- | --- |
+| `cmx sessions list` | List recent sessions, newest first, with harness, provider, request, message, and token counts. |
+| `cmx sessions list --limit=<N>` | Set how many sessions to list. Defaults to `50`; the maximum is `500`. |
+| `cmx sessions list --harness=<name>` | Show only sessions from one client, such as `codex`, `opencode`, or `claude`. |
+| `cmx sessions list --provider=<name>` | Show only sessions for one upstream provider. |
+| `cmx sessions show <id>` | Print a session's details, its compression records, and a short preview of each message. |
+| `cmx sessions delete <id>` | Delete one session and the messages and compression records tied to it. `cmx sessions rm <id>` is an alias. |
+| `cmx sessions purge` | Delete sessions that have not been updated within the local retention period (14 days by default). Also removes expired audit records and unused cached summaries. |
+| `cmx sessions clear` | Delete every stored session and its related records. |
+
+You can combine the `list` filters:
+
+```bash
+cmx sessions list --harness=codex --provider=openai --limit=10
+```
+
+In `cmx sessions show` output, each compression record lists the replaced message range, the original and summary token estimates, and its status. A record marked `credited` counted toward your savings. A record marked `cached` covers content that an earlier record already credited, so CMX did not count it again.
+
+`cmx sessions delete` and `cmx sessions clear` cannot be undone. They do not change your clients' own conversation history.
 
 ## Updates and removal
 
