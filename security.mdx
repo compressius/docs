@@ -55,6 +55,12 @@ cmx vault list
 
 # Trim the vault down to the 500 newest items
 cmx vault prune --keep 500
+
+# Delete a single archived item
+cmx vault delete <id>
+
+# Wipe the vault entirely
+cmx vault clear
 ```
 
 The vault is disabled by default. See [Configuration](/configuration#content-vault-compression-vault) for the full set of keys and the [CLI reference](/cli-reference#content-vault) for the `cmx vault` commands.

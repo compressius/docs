@@ -256,6 +256,36 @@ The output includes the item's kind, tool name and call ID (when the item came f
 
 ---
 
+### `cmx vault delete`
+
+Delete a single archived item from the vault by ID. Use this to remove a specific entry, for example after you have copied its original content elsewhere. `rm` is accepted as an alias.
+
+```bash
+cmx vault delete <id>
+```
+
+**Example:**
+
+```bash
+cmx vault delete 01J8QK6R7XB2Z9K3TF4H2V6C8P
+```
+
+CMX prints a confirmation once the item is removed, or reports that the ID was not found.
+
+---
+
+### `cmx vault clear`
+
+Delete every item from the vault. Use this to reset the archive completely — for example before sharing a machine or after finishing a sensitive session. The action cannot be undone.
+
+```bash
+cmx vault clear
+```
+
+CMX prints how many items were removed.
+
+---
+
 ### `cmx vault prune`
 
 Delete the oldest vault items so that at most a target number of newest items remain. Pruning is applied automatically on every insert using `compression.vault.max_entries`; run this command to trim the vault on demand or to enforce a different cap.
