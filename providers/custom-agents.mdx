@@ -6,7 +6,16 @@ description: "Route a client with a configurable OpenAI, Anthropic, or Gemini AP
 
 # Connect a custom client
 
-Use this guide when your coding tool is not one of the [six supported clients](/providers/overview), but it lets you set its API base URL. The tool must speak a protocol CMX can proxy, and its model provider must already be configured. Custom tools are not automatically detected or restored by `cmx harness` commands.
+Use this guide when your coding tool is not one of the [six supported clients](/providers/overview), but it lets you set its API base URL. The supported clients with dedicated integrations and automated routing via `cmx harness enable <name>` are:
+
+- [Codex](/providers/codex)
+- [OpenCode](/providers/opencode)
+- [Claude Code](/providers/claude-code)
+- [Aider](/providers/aider)
+- [Antigravity CLI (`agy`)](/providers/antigravity)
+- [Cline](/providers/cline)
+
+The custom tool must speak a protocol CMX can proxy, and its model provider must already be configured. Custom tools are not automatically detected or restored by `cmx harness` commands.
 
 ## Choose a base URL
 
