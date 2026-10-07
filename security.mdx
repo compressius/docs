@@ -26,7 +26,7 @@ Do not place provider API keys in `config.json`, terminal screenshots, issue rep
 
 ## What is stored locally
 
-CMX keeps local configuration, usage and session records, compression metadata, and cached summaries in its user data directory. It does not offer raw request logging; `cmx logs` describes the available diagnostics. The **lossless content vault** is disabled by default. If you enable it, selected original tool content removed by local optimization is stored in the local SQLite database. `cmx vault list` and `cmx vault show <id>` can inspect that content; `cmx vault prune` enforces its retention count. Treat the data directory as sensitive and use owner-only filesystem permissions.
+CMX keeps local configuration, usage and session records, compression metadata, and cached summaries in its user data directory. It does not offer raw request logging; `cmx logs` describes the available diagnostics. The **lossless content vault** is disabled by default. If you enable it, selected original tool content removed by local optimization is stored in the local SQLite database. `cmx vault list` and `cmx vault show <id>` can inspect that content; `cmx vault prune` enforces its retention count. To review or remove stored session history, use `cmx sessions list` and `cmx sessions show <id>`, then `cmx sessions delete <id>`, `cmx sessions purge`, or `cmx sessions clear`. See [Local sessions](/cli-reference#local-sessions). Treat the data directory as sensitive and use owner-only filesystem permissions.
 
 `cmx uninstall` removes CMX's local data by default. `--keep-data` retains it. See [Undo and uninstall](/uninstall).
 
