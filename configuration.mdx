@@ -58,7 +58,33 @@ Key compression fields in `config.json` include:
 | `cache_ttl` | In-memory summary retention duration (e.g. `"24h"`). | `"24h"` |
 | `summary_block_ttl` | Suppression window after an upstream 403 rejection (e.g. `"10m"`). | `"10m"` |
 
-The **CONFIG** screen can enable selected local optimizations, including duplicate tool-output pruning, removal of historical error output, truncation of long tool output, stripping eligible historical thinking, and the local content vault. These options have different effects. The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it.
+The **CONFIG** screen can enable selected local optimizations, including duplicate tool-output pruning (`deduplicate`), removal of historical error output (`purge_errors`), truncation of long tool output (`truncate_tools`), stripping eligible historical thinking (`strip_thinking`), and the local content vault (`vault`).
+
+In `config.json`, mechanical pruning passes can be configured under `compression`:
+
+```json
+{
+  "compression": {
+    "deduplicate": {
+      "enabled": false,
+      "min_output_tokens": 200,
+      "excluded_tools": ["bash"],
+      "skip_when_cache_control": true
+    },
+    "purge_errors": {
+      "enabled": false,
+      "turns": 4,
+      "skip_when_cache_control": true
+    }
+  }
+}
+```
+
+- **`deduplicate.min_output_tokens`**: Smallest tool result worth replacing (default `200`). Outputs below this size are untouched. `apply_patch` is always excluded.
+- **`purge_errors.turns`**: Minimum user turns after an error before tool inputs become eligible for rewrite (default `4`, must be `>= 1`).
+- **`skip_when_cache_control`**: When `true` (default), requests carrying prompt cache breakpoints pass through untouched to protect upstream provider caching.
+
+The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it.
 
 The default protected tool list includes `task`, `skill`, `todowrite`, `todoread`, `write`, `edit`, and `apply_patch`. Recent context, instructions, opaque content, and complete protected tool exchanges are also safeguarded by policy. See [How compression works](/how-compression-works).
 
