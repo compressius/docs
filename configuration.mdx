@@ -44,6 +44,20 @@ CMX fills in other defaults when loading its configuration. Keep the gateway on 
 
 The default minimum context is **1,000 estimated tokens** per request, and the recent protected tail is **1,000 tokens**. CMX also requires sufficient eligible context and a proposal that passes policy and economics checks; reaching the minimum alone does not guarantee a summary.
 
+Key compression fields in `config.json` include:
+
+| Key | Description | Default |
+| --- | --- | --- |
+| `min_context_tokens` | Minimum context size before summarization is evaluated. | `1000` |
+| `preserve_tail_tokens` | Recent tokens always preserved verbatim for current work. | `1000` |
+| `safety_margin_tokens` | Minimum net token savings required before applying a summary. | `128` |
+| `max_rounds_per_request` | Maximum internal compression rounds per request (range `1`–`8`). | `8` |
+| `max_island_tokens` | Maximum token size of a contiguous compressible span. | `16000` |
+| `max_summary_tokens` | Maximum tokens requested for an island summary output. | `1500` |
+| `cache_max_entries` | In-memory LRU summary cache capacity. | `64` |
+| `cache_ttl` | In-memory summary retention duration (e.g. `"24h"`). | `"24h"` |
+| `summary_block_ttl` | Suppression window after an upstream 403 rejection (e.g. `"10m"`). | `"10m"` |
+
 The **CONFIG** screen can enable selected local optimizations, including duplicate tool-output pruning, removal of historical error output, truncation of long tool output, stripping eligible historical thinking, and the local content vault. These options have different effects. The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it.
 
 The default protected tool list includes `task`, `skill`, `todowrite`, `todoread`, `write`, `edit`, and `apply_patch`. Recent context, instructions, opaque content, and complete protected tool exchanges are also safeguarded by policy. See [How compression works](/how-compression-works).

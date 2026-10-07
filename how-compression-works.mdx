@@ -17,7 +17,7 @@ CMX receives a coding client's request on `127.0.0.1:17322`, checks whether the 
 5. **Validate:** Policy checks the model's proposal, including structure, protected content, context limits, and expected benefit. A failed or invalid proposal leaves the original request available for forwarding.
 6. **Forward:** CMX sends the approved request to the provider and returns its response to the client.
 
-CMX can reuse cached summaries for repeated eligible context. A request using OpenAI Responses `previous_response_id` bypasses summarization because its conversation state is held by the provider.
+CMX reuses cached summaries for repeated eligible context across requests using both an in-memory LRU cache and the local SQLite database. Contiguous compressible spans are bounded by `max_island_tokens` (default 16,000) so that island cache keys remain stable as conversations expand over time. If an upstream provider rejects synthetic summarization calls (e.g. returning `403 Forbidden`), CMX suppresses summary requests for that route and model for `summary_block_ttl` (default 10 minutes) before probing again. A request using OpenAI Responses `previous_response_id` bypasses summarization because its conversation state is held by the provider.
 
 ## Limits and tradeoffs
 
