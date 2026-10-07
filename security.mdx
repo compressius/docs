@@ -32,6 +32,8 @@ CMX keeps local configuration, usage and session records, compression metadata, 
 
 ## Cloud and updates
 
-Local proxy use does not require a CMX account. An account is needed for account-linked dashboard statistics. Cloud synchronization uses aggregate counters only. Update checks do not install a new binary automatically; `cmx upgrade --install` is an explicit action. Published binary downloads include SHA-256 checksums. A checksum verifies a file against the published checksum manifest; it is not a code-signing claim.
+Local proxy use does not require a CMX account. An account is needed for account-linked dashboard statistics. The only data sent to CMX Cloud is an allowlisted set of aggregate counters (such as processed tokens, estimated saved tokens, and cache rates) — never prompts, responses, source code, or session data.
+
+When you sign in, these counters are signed, associated with your account, and populate your web dashboard. When you run CMX locally without signing in, the same counters are sent as anonymous aggregates isolated from any account. Delivery is best effort in both modes: if it fails or is unavailable, local compression and proxy traffic continue uninterrupted. Update checks do not install a new binary automatically; `cmx upgrade --install` is an explicit action. Published binary downloads include SHA-256 checksums. A checksum verifies a file against the published checksum manifest; it is not a code-signing claim.
 
 For suspected vulnerabilities, contact [hello@compressi.us](mailto:hello@compressi.us) without sending live credentials or private conversation content.
