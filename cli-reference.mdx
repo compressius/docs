@@ -58,7 +58,7 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | `cmx logs` | Explain the available diagnostics; CMX does not capture raw prompts or responses. |
 | `cmx permissions` | Enforce owner-only permissions on CMX directories. |
 | `cmx sessions` | Inspect and delete stored local compression sessions. See [Local sessions](#local-sessions). |
-| `cmx vault list`, `show <id>`, `prune` | Inspect or prune local lossless vault entries if enabled. |
+| `cmx vault` | Inspect, export, or prune local lossless vault entries if enabled. See [Content vault](#content-vault). |
 
 <Note>
   Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
@@ -88,6 +88,23 @@ cmx sessions list --harness=codex --provider=openai --limit=10
 In `cmx sessions show` output, each compression record lists the replaced message range, the original and summary token estimates, and its status. A record marked `credited` counted toward your savings. A record marked `cached` covers content that an earlier record already credited, so CMX did not count it again.
 
 `cmx sessions delete` and `cmx sessions clear` cannot be undone. They do not change your clients' own conversation history.
+
+## Content vault
+
+When the lossless content vault is enabled (`compression.vault.enabled`), CMX archives original text removed by tool pruning, error purging, or truncation into the local SQLite store. Use `cmx vault` to review, export, or trim archived items.
+
+| Command | Action |
+| --- | --- |
+| `cmx vault list` | List recent vault items, showing ID, kind, tool name, original token count, and creation time. |
+| `cmx vault list --limit=<N>` | Set how many vault items to list. Defaults to `50`. |
+| `cmx vault show <id>` | Show metadata and escaped original content of an archived vault item. |
+| `cmx vault show <id> --raw` | Export raw original content bytes directly without terminal escaping. |
+| `cmx vault delete <id>` | Delete an archived item from the vault by ID. `cmx vault rm <id>` is an alias. |
+| `cmx vault clear` | Delete every item from the vault. |
+| `cmx vault prune` | Prune oldest items to retain at most `compression.vault.max_entries` (default `10000`). |
+| `cmx vault prune --keep=<N>` | Retain at most `<N>` newest items. |
+
+The vault is off by default and stays local to your machine. Vault contents are never sent to CMX Cloud.
 
 ## Updates and removal
 
