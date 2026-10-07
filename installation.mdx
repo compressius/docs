@@ -27,7 +27,29 @@ CMX provides binaries for Linux, macOS, and Windows on x64 and ARM64. Install th
   </Tab>
 </Tabs>
 
-Run the installer from an interactive terminal. It lists ready coding clients and asks whether to configure all of them now. Answer `y` to connect the listed clients or `n`/Enter to leave them direct. After `n`, the terminal shows how to connect later through the CLI or **CONFIG** in the TUI. If a piped or detached installer has no readable terminal, setup fails visibly; retry with `cmx setup --ask-connect-ready` in a terminal.
+## Connect ready agents during install
+
+Before the standalone installer changes any coding client settings, it asks for your consent. After setup starts, CMX lists the coding clients and providers it found that are ready to connect, then asks:
+
+```text
+CMX found these ready coding clients and providers:
+  • codex — ChatGPT
+CMX will update their client settings to route requests through the local gateway.
+Configure all listed providers now? [y/N]:
+```
+
+- **Yes (`y`)**: CMX routes every listed client through the local gateway. It also turns on a background check that runs at most once every 24 hours when you use `cmx` commands to connect coding clients you configure later.
+- **No (`n`, or press Enter)**: CMX leaves your client settings unchanged. The 24-hour check stays off, and later `cmx start` runs don't connect clients on their own.
+
+No is the default. If no interactive terminal is available, such as in CI or a piped non-interactive shell, CMX skips the prompt and makes no routing changes; retry with `cmx setup --ask-connect-ready` in an interactive terminal.
+
+If you declined, you can connect agents later. Run `cmx setup --connect-ready` to connect all ready providers and turn on the 24-hour check:
+
+```bash
+cmx setup --connect-ready
+```
+
+To connect a single agent instead, use `cmx harness enable <client>` or the **CONFIG** screen in the `cmx` terminal interface.
 
 The prompt concerns **client routing**, not CMX account registration. A CMX account is optional for local use. Provider sign-in remains in the coding client.
 
