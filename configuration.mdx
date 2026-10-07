@@ -75,6 +75,10 @@ In `config.json`, mechanical pruning passes can be configured under `compression
       "enabled": false,
       "turns": 4,
       "skip_when_cache_control": true
+    },
+    "vault": {
+      "enabled": false,
+      "max_entries": 10000
     }
   }
 }
@@ -83,8 +87,10 @@ In `config.json`, mechanical pruning passes can be configured under `compression
 - **`deduplicate.min_output_tokens`**: Smallest tool result worth replacing (default `200`). Outputs below this size are untouched. `apply_patch` is always excluded.
 - **`purge_errors.turns`**: Minimum user turns after an error before tool inputs become eligible for rewrite (default `4`, must be `>= 1`).
 - **`skip_when_cache_control`**: When `true` (default), requests carrying prompt cache breakpoints pass through untouched to protect upstream provider caching.
+- **`vault.enabled`**: Enables lossless archiving of removed tool content, truncated output, and stripped thinking blocks into local SQLite. Default `false`.
+- **`vault.max_entries`**: Maximum items retained in the vault before oldest entries are pruned automatically (default `10000`).
 
-The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it.
+The lossless vault is **off by default**; when enabled, it archives original content from selected prune or truncate actions in the local SQLite store. Review [Security and data handling](/security) before enabling it. See [Content vault](/cli-reference#content-vault) for management commands.
 
 The default protected tool list includes `task`, `skill`, `todowrite`, `todoread`, `write`, `edit`, and `apply_patch`. Recent context, instructions, opaque content, and complete protected tool exchanges are also safeguarded by policy. See [How compression works](/how-compression-works).
 
