@@ -26,6 +26,10 @@ The standalone Unix and Windows installers run `cmx setup --ask-connect-ready`. 
 
 `cmx stop` restores managed clients to direct settings before shutting down. If restoration fails, the gateway remains running and reports the conflict. A later `cmx start` may reconnect previously selected routes if their direct settings are unchanged. To stay direct, explicitly disconnect or disable the client. See [Undo and uninstall](/uninstall).
 
+## Does CMX work without an internet connection?
+
+Local compression and proxying work without internet access, and local use does not require a CMX account. Your coding client still requires network access to reach your model provider (unless using a local model like Ollama). Dashboard access, metric delivery, and update checks require an internet connection. If CMX Cloud is unavailable, local compression and proxying continue working uninterrupted.
+
 ## Will CMX always reduce my provider bill?
 
 No. Savings depend on session length, eligibility, model pricing, provider caching, and the extra summary call. `cmx stats` reports estimates, not an invoice. Short sessions may show no compression.
