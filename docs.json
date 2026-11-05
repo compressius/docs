@@ -3,13 +3,17 @@
   "theme": "sequoia",
   "name": "Compressius Maximus",
   "colors": {
-    "primary": "#e14e68",
-    "light": "#8727fc",
-    "dark": "#8c51fc"
+    "primary": "#c81e3c",
+    "light": "#c81e3c",
+    "dark": "#e14e68"
+  },
+  "logo": {
+    "light": "/images/logo-dark.png",
+    "dark": "/images/logo-dark.png"
   },
   "favicon": {
-    "light": "/images/ChatGPTImageSep15,2026,10_07_23PM.png",
-    "dark": "/images/ChatGPTImageSep15,2026,10_07_23PM.png"
+    "light": "/images/favicon-32x32.png",
+    "dark": "/images/favicon-32x32.png"
   },
   "navigation": {
     "tabs": [
@@ -88,7 +92,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/compressius/cmx2"
+      "github": "https://github.com/compressius/cmx"
     }
   },
   "contextual": {

@@ -14,9 +14,10 @@ cmx status
 cmx harness list
 cmx harness verify
 cmx doctor
+cmx selftest
 ```
 
-`cmx status` checks the local gateway. `cmx harness verify` checks managed client routing. Neither proves a provider answered a request. After connecting, restart the coding client, send a normal request, and compare `cmx stats` before and after.
+`cmx status` checks the local gateway. `cmx harness verify` checks managed client routing. `cmx doctor` runs comprehensive environment checks, and `cmx selftest` verifies all 16 runtime invariants (`INV-01` to `INV-16`). Neither proves a provider answered a request. After connecting, restart the coding client, send a normal request, and compare `cmx stats` before and after.
 
 ## `cmx` is not found
 

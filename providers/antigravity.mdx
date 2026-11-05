@@ -1,26 +1,29 @@
 ---
-title: "Connect Antigravity CLI"
-sidebarTitle: "Antigravity CLI"
-description: "Connect Google's agy CLI through CMX and safely restore its original executable."
+title: "Connect Antigravity (IDE & CLI)"
+sidebarTitle: "Antigravity"
+description: "Connect Google Antigravity IDE and agy CLI through CMX and safely restore original executables."
 ---
 
-# Connect Antigravity CLI
+# Connect Antigravity (IDE & CLI)
 
-This integration is for the `agy` command-line client. Install the official Antigravity CLI and complete its normal first-run sign-in before connecting. It is separate from any graphical Antigravity application.
+CMX provides native integrations for both the **Antigravity IDE** and the **Antigravity CLI (`agy`)**. Install Antigravity and sign in with your Google account before connecting.
 
 ```bash
-agy
 cmx setup --ask-connect-ready
 cmx harness list
 cmx harness enable antigravity
 ```
 
-CMX places a reversible wrapper around `agy` so the CLI uses local CloudCode and Gemini routes. It keeps the original executable as a `.real` companion. Start a new `agy` process, send a request, then check `cmx stats`. The provider list may show Antigravity as ready based on the executable alone; a real request is the sign-in check.
+CMX detects Antigravity installations and places reversible shims around their execution paths:
+- **Antigravity IDE:** Wraps the internal `language_server` binary (located in your Antigravity installation's `resources/bin/` directory) so language intelligence and model requests route through local CMX CloudCode and Gemini proxies.
+- **Antigravity CLI (`agy`):** Wraps `~/.local/bin/agy` (or platform equivalent) to export `CLOUD_CODE_URL` and `GOOGLE_GEMINI_BASE_URL` pointing to `127.0.0.1:17322`.
 
-## Return to the original CLI
+CMX preserves the original executables as `.real` companion binaries. Launch Antigravity IDE or start an `agy` session, send a query, and check `cmx stats` or `cmx harness verify` to confirm live traffic routing.
+
+## Return to direct routing
 
 ```bash
 cmx harness disable antigravity
 ```
 
-This restores the original `agy` executable. `cmx stop` and `cmx uninstall` also restore wrapped clients before shutting down or removing CMX. If restoration fails, keep CMX installed and resolve the reported error before deleting any wrapper or `.real` file.
+This restores the original unmodified `language_server` and `agy` binaries. `cmx stop` and `cmx uninstall` also safely restore wrapped clients before shutting down or removing CMX. If restoration reports an edited config, resolve the conflict or use `cmx harness disable antigravity --force`.

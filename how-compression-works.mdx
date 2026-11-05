@@ -10,21 +10,26 @@ CMX receives a coding client's request on `127.0.0.1:17322`, checks whether the 
 
 ## The request path
 
-1. **Inspect:** CMX estimates the current request's context size. The default minimum for considering compression is 1,000 estimated tokens. This is not a promise to compress every request above it.
-2. **Protect:** System and developer instructions, recent context, opaque blocks, protected tool calls and their results, and complete tool exchanges stay intact.
-3. **Prepare:** Enabled local options may remove duplicate or errored historical tool output, truncate long tool output, or strip eligible older thinking. The content vault can retain originals locally when explicitly enabled.
-4. **Summarize:** For eligible older spans, CMX asks the selected model to make a factual summary. This is an additional provider call that can cost tokens.
+1. **Inspect:** CMX estimates the current request's context size. The default minimum for considering compression is 8,000 estimated tokens (`min_context_tokens`). This ensures small, fast requests pass through with zero added latency.
+2. **Protect:** System and developer instructions, recent context (the last 1,000 tokens), opaque blocks, protected tool calls and their results, and complete tool exchanges stay intact.
+3. **Prepare:** Enabled zero-cost mechanical passes remove duplicate or superseded historical tool output, purge obsolete errored tool arguments, truncate lengthy tool dumps, or strip older thinking blocks. The lossless content vault archives original text locally.
+4. **Summarize:** For eligible older spans beyond the threshold, CMX can ask the selected model to make a factual summary.
 5. **Validate:** Policy checks the model's proposal, including structure, protected content, context limits, and expected benefit. A failed or invalid proposal leaves the original request available for forwarding.
 6. **Forward:** CMX sends the approved request to the provider and returns its response to the client.
 
-CMX reuses cached summaries for repeated eligible context across requests using both an in-memory LRU cache and the local SQLite database. Contiguous compressible spans are bounded by `max_island_tokens` (default 16,000) so that island cache keys remain stable as conversations expand over time. If an upstream provider rejects synthetic summarization calls (e.g. returning `403 Forbidden`), CMX suppresses summary requests for that route and model for `summary_block_ttl` (default 10 minutes) before probing again. A request using OpenAI Responses `previous_response_id` bypasses summarization because its conversation state is held by the provider.
+CMX reuses cached summaries for repeated eligible context across requests using both an in-memory LRU cache and the local SQLite database. Contiguous compressible spans are bounded by `max_island_tokens` (default 16,000) so that island cache keys remain stable as conversations expand over time. If an upstream provider rejects synthetic summarization calls (e.g. returning `403 Forbidden`), CMX suppresses summary requests for that route and model for `summary_block_ttl` (default 10 minutes) before probing again.
 
-## Pre-summarization passes
+For OpenAI Responses (`/v1/responses`), stateless mechanical compaction natively eliminates duplicate tool reads and prunes superseded outputs directly on the wire payload, avoiding token bloat across agent tool-use loops.
 
-Mechanical passes run before model-directed summarization. They are opt-in, disabled by default, cost zero model tokens, and fail open:
+## Pre-summarization passes (Zero-Cost Mode)
+
+Mechanical passes run before model-directed summarization. They are enabled by default in Zero-Cost Mode, cost zero model tokens, and fail open:
 
 - **Duplicate tool-output pruning (`deduplicate`):** Groups complete tool exchanges by tool name and canonicalized arguments, keeps the newest result intact, and replaces older result bodies with a fixed placeholder. Tool pairing, roles, and message ordering remain preserved.
+- **Superseded tool pruning:** Prunes earlier tool outputs when a newer read or write for the same file/target has superseded them in the conversation history.
 - **Errored tool-input purge (`purge_errors`):** Once a failed tool exchange is at least several user turns old (`turns`, default `4`), replaces the call's arguments with a dialect-safe placeholder. The error result itself is preserved byte-for-byte so the model knows the call failed.
+- **Tool truncation (`truncate_tools`):** Bounds very large tool outputs while preserving meaningful head and tail lines.
+- **Thinking block stripping (`strip_thinking`):** Strips historical model thinking tokens from prior turns while preserving current turn reasoning.
 
 Both passes skip requests carrying prompt cache breakpoints when `skip_when_cache_control` is `true`. Avoided tokens are credited to your accounting.
 

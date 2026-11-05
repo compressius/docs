@@ -6,17 +6,27 @@ description: "Find published CMX releases and understand recent documentation ch
 
 # Release notes and changes
 
-The [GitHub releases page](https://github.com/compressius/cmx2/releases) is the source of truth for **published** versions, dates, downloadable assets, and checksums. Check `cmx --version` to see what is installed on your computer. A local release bundle or source change is not available to `cmx upgrade` until it is published.
+The [GitHub releases page](https://github.com/compressius/cmx/releases) is the source of truth for **published** versions, dates, downloadable assets, and checksums. Check `cmx --version` to see what is installed on your computer.
 
-## Changes covered by this documentation
+## Recent releases
 
-This documentation update covers the current source behavior being prepared for release:
+### CMX v0.3.16
+- **Accurate Harness Detection & Real-time Routing Alignment**: Aligned harness configuration detection with active gateway route state across Codex, OpenCode, Antigravity, and Claude. Connected harnesses accurately reflect their live proxy routing state without false disconnected indicators.
+- **Distilled 80x24 TUI Dashboard**: Streamlined the terminal user interface dashboard layout to cleanly fit within standard 80x24 terminal geometries. Eliminated promotional copy and redundant marketing prompts, prioritizing immediate visual clarity for active gateway metrics, token avoidance, and connected agent states.
+- **Mechanical Compaction for `/v1/responses`**: Extended zero-cost compaction passes to the `/v1/responses` protocol dialect, enabling deduplication of repeated tool outputs and superseded tool results across stateless agent loops.
+- **Discovery Probe Error Isolation**: Isolated upstream 4xx responses on auxiliary discovery endpoints so initial model or endpoint capability probes do not mark usage records as pipeline failures.
 
-- Six supported coding clients: Codex, OpenCode, Claude Code, Aider, Antigravity CLI, and Cline CLI.
-- Optional CMX account sign-in for local gateway use.
-- Consent-aware installer setup. The Unix and Windows installers ask before connecting ready providers. `n` leaves clients direct and shows manual connection commands. An unavailable terminal produces an error instead of silently choosing an answer.
-- Read-only `cmx providers <client> list`, so checking discovered providers cannot change OpenCode routing.
-- Safer restoration: `cmx stop` restores client settings before stopping and retains the gateway if restoration fails. An explicit `n` during setup clears pending reconnection.
-- Clearer separation of coding clients, upstream model providers, compression support, local storage, and cloud metrics.
+### CMX v0.3.15
+- **Unified CMX Marker Detection & Policy Invariants**: Streamlined marker detection across compression policies and passes, ensuring strict invariant enforcement and zero-loss decision routing.
+- **Protocol Adapter Dialect Fidelity**: Extended `ToolChoiceForced` and structured output schema parsing across all protocol adapters (Anthropic, Chat, and Responses), ensuring reliable pass-through of enforced tool calling and typed generation constraints.
+- **Worker Security & Fail-Closed Validation**: Cloud service endpoints now enforce strict schema allowlists for device metrics, return HTTP 502 Bad Gateway on upstream release fetch degradation, and mandate `Cache-Control: private, no-store` on authenticated session and pairing routes.
+- **Dashboard Usability & Full Accessibility (a11y)**: Comprehensive accessibility enhancements across the web dashboard, including accessible history table pagination, ARIA loading states, range selector focus management, and automatic OS detection for installation snippets.
 
-These are documentation notes, **not** a claim that every published binary already contains every behavior. Check the installed version and its published release notes before relying on a change.
+## Core capabilities covered by this documentation
+
+- **Supported coding clients**: Codex, OpenCode, Claude Code, Aider, Antigravity (IDE & CLI), and Cline.
+- **Zero-Cost Mode enabled by default**: Mechanical passes (duplicate tool-output pruning, superseded tool pruning, errored-input purging, tool truncation, and thinking block stripping) run before LLM summarization at zero token cost.
+- **Lossless content vault**: Archives removed tool text and truncated outputs locally in SQLite, enabled by default with configurable retention limits.
+- **Consent-aware installer setup**: Unix and Windows installers ask before connecting ready providers. `n` leaves clients direct and displays manual connection commands.
+- **Safe restoration**: `cmx stop` and `cmx uninstall` safely restore client settings before stopping or removing the gateway, preventing disconnected tools.
+- **Runtime self-tests**: `cmx selftest` enforces 16 runtime invariants (`INV-01` through `INV-16`) guarding schema consistency, token estimator ratios, and doctor synchronization.

@@ -1,6 +1,6 @@
 # CMX documentation
 
-This repository contains the Mintlify source for [docs.compressi.us](https://docs.compressi.us). The CMX product source is in [compressius/cmx2](https://github.com/compressius/cmx2); use its current CLI and implementation to verify technical claims before changing these pages.
+This repository contains the Mintlify source for [docs.compressi.us](https://docs.compressi.us). The public CMX repository is [compressius/cmx](https://github.com/compressius/cmx); use its releases, installers, and CLI implementation to verify technical claims before changing these pages.
 
 ## Find the right page
 

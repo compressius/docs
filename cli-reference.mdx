@@ -49,16 +49,20 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | Command | Action |
 | --- | --- |
 | `cmx start` | Start the local background gateway; may restore previously selected routes. |
-| `cmx serve` | Run the gateway in the current terminal. |
-| `cmx status` / `cmx status --json` | Show gateway state and version. |
-| `cmx restart` | Restart the gateway after a CMX configuration change. |
-| `cmx stop` | Restore managed clients to direct settings, then stop. Leaves the gateway running if restoration fails. |
+| `cmx serve` | Run the gateway in the foreground. |
+| `cmx status` / `cmx status --json` | Show gateway state, version, and active token metrics. |
+| `cmx restart` | Gracefully restart the gateway daemon. |
+| `cmx stop` | Restore managed clients to direct settings, then stop. Leaves gateway running if restoration fails. |
+| `cmx autostart [enable\|disable\|status]` | Manage automatic gateway startup on system boot (systemd/launchd/Windows Run). |
 | `cmx stats` | Show local usage and savings estimates. |
-| `cmx doctor` | Run installation and connectivity checks. |
+| `cmx doctor` | Run configuration, autostart, permissions, and connectivity checks. |
+| `cmx selftest` | Run comprehensive runtime invariant checks (`INV-01` through `INV-16`). |
+| `cmx pair [code\|status]` | Generate pairing codes or check pairing status with the web dashboard. |
+| `cmx store [status\|vacuum]` | Inspect local SQLite database size, run maintenance, or optimize storage. |
 | `cmx logs` | Explain the available diagnostics; CMX does not capture raw prompts or responses. |
-| `cmx permissions` | Enforce owner-only permissions on CMX directories. |
+| `cmx permissions [check\|fix]` | Check and enforce owner-only permissions on CMX files and directories. |
 | `cmx sessions` | Inspect and delete stored local compression sessions. See [Local sessions](#local-sessions). |
-| `cmx vault` | Inspect, export, or prune local lossless vault entries if enabled. See [Content vault](#content-vault). |
+| `cmx vault` | Inspect, export, or prune local lossless vault entries. See [Content vault](#content-vault). |
 
 <Note>
   Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
@@ -104,7 +108,7 @@ When the lossless content vault is enabled (`compression.vault.enabled`), CMX ar
 | `cmx vault prune` | Prune oldest items to retain at most `compression.vault.max_entries` (default `10000`). |
 | `cmx vault prune --keep=<N>` | Retain at most `<N>` newest items. |
 
-The vault is off by default and stays local to your machine. Vault contents are never sent to CMX Cloud.
+The vault is enabled by default (`compression.vault.enabled: true`) and stays strictly local to your machine. Vault contents are never sent to CMX Cloud.
 
 ## Updates and removal
 
