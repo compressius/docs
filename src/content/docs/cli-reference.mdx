@@ -64,9 +64,9 @@ See [Supported clients](/providers/overview) for connection IDs and readiness li
 | `cmx sessions` | Inspect and delete stored local compression sessions. See [Local sessions](#local-sessions). |
 | `cmx vault` | Inspect, export, or prune local lossless vault entries. See [Content vault](#content-vault). |
 
-<Note>
-  Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
-</Note>
+:::note
+Stopping from the terminal interface, or sending `SIGINT` or `SIGTERM` to the gateway, restores clients the same way. Running `cmx stop` again after a successful stop is safe: it changes nothing and keeps the pending reconnection for a later `cmx start`.
+:::
 
 ## Local sessions
 

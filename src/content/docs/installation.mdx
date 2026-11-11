@@ -4,6 +4,8 @@ sidebarTitle: "Installation"
 description: "Install CMX on Linux, macOS, or Windows and understand the connection prompt."
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 # Install CMX
 
 CMX provides binaries for Linux, macOS, and Windows on x64 and ARM64. Install the coding client you want to use separately, and sign in to its model provider through that client.
@@ -11,20 +13,20 @@ CMX provides binaries for Linux, macOS, and Windows on x64 and ARM64. Install th
 ## Standalone installer
 
 <Tabs>
-  <Tab title="Linux and macOS">
+  <TabItem label="Linux and macOS">
     ```bash
     curl -sSfL https://compressi.us/install.sh | sh
     ```
 
     The script downloads the matching release binary, checks it against `SHA256SUMS`, and installs to `/usr/local/bin` when writable or `~/.local/bin` otherwise. It then runs `cmx setup --ask-connect-ready` unless `CMX_SKIP_START=1` is set.
-  </Tab>
-  <Tab title="Windows PowerShell">
+  </TabItem>
+  <TabItem label="Windows PowerShell">
     ```powershell
     iwr -useb https://compressi.us/install.ps1 | iex
     ```
 
     The script verifies the binary checksum, installs to `%LOCALAPPDATA%\CMX\bin`, adds that folder to your user PATH, and creates a Start menu shortcut. It then runs `cmx setup --ask-connect-ready`. Open a new terminal if `cmx` is not found immediately.
-  </Tab>
+  </TabItem>
 </Tabs>
 
 ## Connect ready agents during install
@@ -85,4 +87,6 @@ cmx uninstall
 
 The command restores your coding agents to their direct connections, stops the gateway, removes background services, and deletes CMX configuration, data, and the executable. See [Undo and uninstall](/uninstall) for flags and the platform-specific cleanup.
 
-<Note>The documented behavior follows the current source. Check `cmx --version` when using an older published release; options and supported clients can differ.</Note>
+:::note
+The documented behavior follows the current source. Check `cmx --version` when using an older published release; options and supported clients can differ.
+:::

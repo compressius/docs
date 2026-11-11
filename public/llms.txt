@@ -1,0 +1,38 @@
+# Compressius Maximus (CMX) Documentation
+
+> Compressius Maximus (CMX) is a free, local-first AI gateway for coding clients that compresses conversation context before requests reach your model provider, cutting token usage and API costs on 127.0.0.1:17322.
+> Official Wikidata Entity: https://www.wikidata.org/wiki/Q142111814
+> Official Website: https://compressi.us
+> Documentation: https://docs.compressi.us
+
+## Getting Started
+- [What CMX does](https://docs.compressi.us/introduction): Understand the local CMX gateway, coding clients, model providers, and compression limits.
+- [Quickstart](https://docs.compressi.us/quickstart): Install CMX, choose a coding client connection, verify traffic, and undo routing.
+- [Install CMX](https://docs.compressi.us/installation): Install CMX on Linux, macOS, or Windows and understand the connection prompt.
+- [Undo and uninstall](https://docs.compressi.us/uninstall): Restore direct client connections safely and remove CMX on Linux, macOS, or Windows.
+
+## Clients & Providers
+- [Supported coding clients](https://docs.compressi.us/providers/overview): Choose a CMX coding client integration and learn the difference between clients and model providers.
+- [Connect Codex](https://docs.compressi.us/providers/codex): Route Codex OpenAI API or ChatGPT requests through CMX and restore direct routing.
+- [Connect OpenCode](https://docs.compressi.us/providers/opencode): Connect an OpenCode provider through CMX without changing native credentials or other provider settings.
+- [Connect Claude Code](https://docs.compressi.us/providers/claude-code): Connect Claude Code's Anthropic API route through the local CMX gateway.
+- [Connect Aider](https://docs.compressi.us/providers/aider): Route Aider's OpenAI-compatible API traffic through CMX and restore its original base URL.
+- [Connect Antigravity (IDE & CLI)](https://docs.compressi.us/providers/antigravity): Connect Google Antigravity IDE and agy CLI through CMX and safely restore original executables.
+- [Connect Cline](https://docs.compressi.us/providers/cline): Connect Cline CLI or detected Cline settings to CMX and restore the native provider route.
+- [Connect ChatGPT Desktop](https://docs.compressi.us/providers/chatgpt-desktop): Connect ChatGPT Desktop through CMX.
+- [Model providers and routes](https://docs.compressi.us/model-providers): Built-in CMX upstream provider IDs, native credentials, and route selection.
+- [Request an integration](https://docs.compressi.us/providers/suggest-provider): Suggest a coding client or model provider for CMX support.
+
+## Setup & Operation
+- [Configure CMX](https://docs.compressi.us/configuration): Manage client routing, local gateway settings, compression policy, and storage.
+- [Connect a custom client](https://docs.compressi.us/providers/custom-agents): Route a client with a configurable OpenAI, Anthropic, or Gemini API base URL through CMX.
+- [How compression works](https://docs.compressi.us/how-compression-works): Learn when CMX can compress, what it protects, and why savings vary.
+- [Understand savings](https://docs.compressi.us/understanding-savings): Interpret local CMX usage figures and compare them with provider billing.
+- [Update CMX](https://docs.compressi.us/updates): Check and install published CMX releases without changing provider credentials.
+- [CLI reference](https://docs.compressi.us/cli-reference): The commands for setup, client routing, gateway lifecycle, usage, updates, and removal.
+
+## Help & Verification
+- [Troubleshooting](https://docs.compressi.us/troubleshooting): Find and fix installation, consent, routing, provider, and restoration problems.
+- [Frequently asked questions](https://docs.compressi.us/faq): Short answers about accounts, clients, savings, privacy, routing, and removal.
+- [Security and data handling](https://docs.compressi.us/security): Understand CMX's local gateway, provider credentials, local storage, and cloud data boundary.
+- [Release notes and changes](https://docs.compressi.us/changelog): Find published CMX releases and understand recent documentation changes.

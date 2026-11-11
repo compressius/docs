@@ -4,6 +4,8 @@ sidebarTitle: "Undo and uninstall"
 description: "Restore direct client connections safely and remove CMX on Linux, macOS, or Windows."
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
 # Disconnect, stop, or uninstall
 
 Choose the outcome you want:
@@ -50,7 +52,7 @@ To retain local history or configuration for a later reinstall, add `--keep-data
 `cmx uninstall` removes the running executable and CMX-managed state. The package manager may still record an installed package, and an installer-created shortcut or PATH entry can remain. After `cmx uninstall` succeeds, do the matching cleanup:
 
 <Tabs>
-  <Tab title="Linux / macOS">
+  <TabItem label="Linux / macOS">
     If you installed through npm or pnpm, run the matching command:
 
     ```bash
@@ -60,8 +62,8 @@ To retain local history or configuration for a later reinstall, add `--keep-data
     ```
 
     For a standalone install, check `command -v cmx` in a **new terminal**. If another copy remains, identify its path before removing it. The normal standalone locations are `/usr/local/bin/cmx` or `~/.local/bin/cmx`.
-  </Tab>
-  <Tab title="Windows PowerShell">
+  </TabItem>
+  <TabItem label="Windows PowerShell">
     If you installed through npm or pnpm, run the matching command:
 
     ```powershell
@@ -71,7 +73,7 @@ To retain local history or configuration for a later reinstall, add `--keep-data
     ```
 
     The standalone PowerShell installer puts CMX in `%LOCALAPPDATA%\CMX\bin`, adds that directory to your **user** PATH, and creates a CMX Start menu shortcut. After uninstalling, remove the shortcut and that exact PATH entry if they remain. Open a new PowerShell window and run `Get-Command cmx -ErrorAction SilentlyContinue` to check for another installed copy. If the executable was renamed to `cmx.exe.old` because Windows had it open, delete that file after closing the process.
-  </Tab>
+  </TabItem>
 </Tabs>
 
 Do not force-kill the gateway or delete client backup files before restoration. If `cmx uninstall` reports a conflict, follow [Troubleshooting](/troubleshooting) or contact support with the error text, not the client config or API keys.

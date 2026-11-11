@@ -1,34 +1,52 @@
-# CMX documentation
+# CMX Documentation
 
-This repository contains the Mintlify source for [docs.compressi.us](https://docs.compressi.us). The public CMX repository is [compressius/cmx](https://github.com/compressius/cmx); use its releases, installers, and CLI implementation to verify technical claims before changing these pages.
+This repository contains the documentation source for [docs.compressi.us](https://docs.compressi.us), built with [Astro Starlight](https://starlight.astro.build) and deployed directly to **Cloudflare Pages**.
+
+The public CMX repository is [compressius/cmx](https://github.com/compressius/cmx); use its releases, installers, and CLI implementation to verify technical claims before changing these pages.
 
 ## Find the right page
 
 | Reader needs | Start here |
 | --- | --- |
-| First installation | [Quickstart](quickstart.mdx) and [Installation](installation.mdx) |
-| Connect a coding client | [Supported clients](providers/overview.mdx) |
-| Understand upstream services | [Model providers](model-providers.mdx) |
-| Restore or remove CMX | [Undo and uninstall](uninstall.mdx) |
-| Diagnose routing | [Troubleshooting](troubleshooting.mdx) |
-| Privacy and storage | [Security](security.mdx) |
+| First installation | [Quickstart](src/content/docs/quickstart.mdx) and [Installation](src/content/docs/installation.mdx) |
+| Connect a coding client | [Supported clients](src/content/docs/providers/overview.mdx) |
+| Understand upstream services | [Model providers](src/content/docs/model-providers.mdx) |
+| Restore or remove CMX | [Undo and uninstall](src/content/docs/uninstall.mdx) |
+| Diagnose routing | [Troubleshooting](src/content/docs/troubleshooting.mdx) |
+| Privacy and storage | [Security](src/content/docs/security.mdx) |
 
 The docs distinguish **coding clients** from **model providers**. Local CMX use does not require a CMX account. The standalone installers ask before connecting ready providers. Client authentication stays in the native client.
 
 ## Edit and preview
 
-Pages are MDX files. `docs.json` controls site navigation. Use concise headings, active voice, second person, and copyable commands. Update navigation when adding a page. Keep commands consistent with the current CMX source and avoid claiming that an unpublished local build is available to users.
+Pages are MDX files located in `src/content/docs/`. Navigation and metadata are configured in `astro.config.mjs`.
 
-From this directory, preview with the [Mintlify CLI](https://mintlify.com/docs/development):
+### Local Development
 
 ```bash
-npx mint dev
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-Check internal links and the platform-specific commands you change. A documentation edit in this local clone is not published until it is reviewed and deployed through the repository's normal workflow.
+### Production Build & Preview
 
-For errors, open an issue or pull request in [this repository](https://github.com/compressius/docs). Do not put provider keys, private prompts, or client configuration files in an issue.
+```bash
+# Build static site, compile search index, and generate sitemaps
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+### Cloudflare Pages Deployment
+- **Build command:** `npm run build`
+- **Build output directory:** `dist`
+- **Node.js version:** `>= 20.0.0`
+- Custom headers, caching, and security policies are defined in `public/_headers`.
 
 ## License
 
-CMX software is distributed under the [Proprietary Gratis License](LICENSE). The site’s EULA explains those terms; the LICENSE file is the canonical text. Earlier revisions of this documentation repository carried an MIT license.
+CMX software is distributed under the [Proprietary Gratis License](LICENSE). The site’s EULA explains those terms; the LICENSE file is the canonical text.

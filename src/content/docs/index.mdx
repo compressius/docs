@@ -4,18 +4,20 @@ sidebarTitle: "Home"
 description: "Install CMX, connect a coding client, and manage local context compression."
 ---
 
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
 # Compressius Maximus
 
 CMX is a local gateway for AI coding clients. It sits between a client such as Codex or OpenCode and the model provider that client already uses. In longer sessions, CMX can summarize eligible older context before forwarding a request. Your provider still handles the model request and its normal charges still apply.
 
 The gateway listens on `127.0.0.1:17322`. You can use it locally without a CMX account. Sign in to CMX only if you want an account-linked dashboard and detailed account statistics.
 
-<CardGroup cols={2}>
-  <Card title="Get started" icon="rocket" href="/quickstart">Install, choose whether to connect detected clients, and check a real request.</Card>
-  <Card title="Supported clients" icon="terminal" href="/providers/overview">Connect Codex, OpenCode, Claude Code, Aider, Antigravity (IDE & CLI), or Cline.</Card>
-  <Card title="Model providers" icon="cloud" href="/model-providers">Find built-in upstream routes and learn how native credentials work.</Card>
-  <Card title="Undo or uninstall" icon="rotate-left" href="/uninstall">Restore direct connections before removing CMX.</Card>
-</CardGroup>
+<CardGrid>
+  <LinkCard title="Get started" href="/quickstart" description="Install, choose whether to connect detected clients, and check a real request." />
+  <LinkCard title="Supported clients" href="/providers/overview" description="Connect Codex, OpenCode, Claude Code, Aider, Antigravity (IDE & CLI), or Cline." />
+  <LinkCard title="Model providers" href="/model-providers" description="Find built-in upstream routes and learn how native credentials work." />
+  <LinkCard title="Undo or uninstall" href="/uninstall" description="Restore direct connections before removing CMX." />
+</CardGrid>
 
 ## What to expect
 
