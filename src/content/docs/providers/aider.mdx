@@ -1,25 +1,66 @@
 ---
-title: "Connect Aider"
+title: "Aider Token Saver & Context Compression | Connect Aider"
 sidebarTitle: "Aider"
-description: "Route Aider's OpenAI-compatible API traffic through CMX and restore its original base URL."
+description: "Save tokens and reduce LLM API billing during Aider AI pair programming sessions. Compress conversation history with local CMX gateway routing."
 ---
 
-# Connect Aider
+# Connect Aider for AI token compression & cost savings
 
-CMX's Aider integration changes the OpenAI-compatible API base in Aider's configuration. Install Aider and provide its model provider credential through Aider's normal environment first. `cmx providers aider list` reports readiness when it sees `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`; the configured OpenAI-compatible route is what CMX changes.
+Aider token compression allows developers using Aider (`aider-chat`) for AI pair programming to cut token usage, prevent context bloat, and reduce LLM API billing across OpenAI, Anthropic, OpenRouter, and DeepSeek models. CMX runs as a local proxy on `127.0.0.1:17322`, compressing conversation history and pruning repetitive git and tool outputs.
+
+Aider excels at multi-file editing and automated git commits directly in your terminal. However, as coding sessions grow, Aider repeatedly resends repository maps, file trees, and past diffs, leading to rapid token consumption and inflated per-turn costs.
+
+## Why Aider pair programming consumes heavy tokens
+
+During typical pair programming workflows, Aider:
+- Analyzes and updates an in-context **repository map** across your project structure.
+- Tracks git commit logs, staged diffs, and file edits across multiple turns.
+- Executes automated test and lint commands, recording outputs into session history.
+
+On every prompt, Aider re-transmits this expanding history to the model provider. In extended sessions, input tokens often surpass 60k–120k tokens per prompt. For pay-per-token models like GPT-4o, Claude 3.7 Sonnet, or DeepSeek-V3, this drives up costs rapidly and can degrade model attention on the current task.
+
+## How CMX saves tokens in Aider
+
+- **Prunes redundant diffs and logs:** Strips out historical test outputs, repetitive lint errors, and intermediate git diffs that have already been resolved.
+- **Compresses earlier conversation spans:** Summarizes older conversational context once the session crosses your configured threshold, keeping context tight.
+- **Protects active code editing:** Ensures current file contents, active instructions, and sensitive tool parameters remain completely lossless.
+- **Preserves native credentials:** Your `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` stays in your shell environment; CMX only rewrites the local API base endpoint.
+
+## Setup: Connect Aider to CMX
+
+Install Aider and export your model provider credentials in your terminal environment first, then enable the CMX integration:
 
 ```bash
-cmx setup --ask-connect-ready
+# 1. Verify detected Aider credentials and configuration
 cmx providers aider list
+
+# 2. Connect Aider to the local CMX gateway
 cmx harness enable aider
 ```
 
-CMX normally uses `~/.aider.conf.yml` and also recognizes `AIDER_CONFIG`. Start a new Aider process, send a request, then check `cmx stats`. Aider models that use a different API base or protocol need separate verification.
+CMX configures the `openai-api-base` setting in your Aider configuration file (typically `~/.aider.conf.yml`; `AIDER_CONFIG` is also supported) to point to `http://127.0.0.1:17322/route/openai/v1`.
 
-## Return to a direct connection
+## Verify live token compression
+
+1. Start a new Aider session in your terminal (`aider`).
+2. Add files and complete a pair programming task.
+3. Check real-time token savings and verify gateway traffic:
 
 ```bash
+# Verify that Aider traffic routes through CMX
+cmx harness verify
+
+# Inspect live token compression statistics
+cmx stats
+```
+
+## Return to direct Aider routing
+
+To restore Aider's original unproxied configuration and remove the CMX API base:
+
+```bash
+# Disable the Aider harness
 cmx harness disable aider
 ```
 
-Restart Aider after restoring. If you need to stop the gateway as well, use `cmx stop`; it restores active client routes before stopping.
+Restart your Aider process afterward. If you stop the CMX gateway using `cmx stop`, CMX automatically restores your pre-connection configuration before exiting.

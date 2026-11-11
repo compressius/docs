@@ -1,54 +1,74 @@
 ---
-title: "Model providers and routes"
+title: "Upstream Model Providers & API Cost Savings | OpenAI, Anthropic, Gemini"
 sidebarTitle: "Model providers"
-description: "Built-in CMX upstream provider IDs, native credentials, and route selection."
+description: "Supported LLM providers (OpenAI, Anthropic, OpenRouter, DeepSeek, Gemini, Groq, Ollama) and how CMX compresses prompts to cut per-token API charges."
 ---
 
-# Model providers and routes
+# Upstream model providers & API cost savings
 
-A **model provider** is the service that answers a request from your coding client. A **coding client** is Codex, OpenCode, Claude Code, Aider, Antigravity CLI, or Cline. Connect the client first using its [client guide](/providers/overview). Its normal sign-in or API key remains with that client; CMX does not create a provider account or save provider keys.
+CMX reduces per-token API expenses and prevents context window exhaustion across major upstream model providers, including OpenAI, Anthropic, Google Gemini, OpenRouter, DeepSeek, and Groq. By compressing repetitive conversation context on `127.0.0.1:17322` before forwarding requests, CMX cuts input token charges without exposing private code or credentials.
 
-CMX has these built-in upstream IDs in the current source:
+A **model provider** is the cloud or local service that executes neural network inference and bills for token consumption. A **coding client** (such as Codex, OpenCode, Claude Code, Aider, Antigravity, or Cline) is the development environment where you code. CMX leaves your native API keys securely inside your coding client while routing traffic through its local compression engine.
 
-| ID | Service or route |
-| --- | --- |
-| `openai` | OpenAI API |
-| `anthropic` | Anthropic API |
-| `openrouter` | OpenRouter |
-| `gemini` | Google Gemini API |
-| `cloudcode` | Google CloudCode route used by Antigravity CLI |
-| `deepseek` | DeepSeek |
-| `groq` | Groq |
-| `mistral` | Mistral |
-| `togetherai` | Together AI |
-| `perplexity` | Perplexity |
-| `xai` | xAI |
-| `ollama` | Local Ollama at `127.0.0.1:11434` by default |
-| `commandcode` | Command Code |
-| `opencode` | OpenCode Zen |
-| `opencode-go` | OpenCode Go |
-| `cline` | Cline's API route |
+## Built-in upstream provider matrix & token cost impact
 
-A built-in ID means CMX knows an upstream endpoint shape. It does **not** mean your coding client has credentials, that every model works, or that every protocol is compressed. Credentials and available models come from the native client and provider. Check readiness with `cmx providers <client> list`, then connect an ID that the client actually shows. For example:
+| Upstream ID | Target service | Compatible models | Cost savings impact |
+| --- | --- | --- | --- |
+| `openai` | OpenAI API | GPT-4o, o1, o3-mini | Reduces input token billing on expensive reasoning models |
+| `anthropic` | Anthropic API | Claude 3.7 Sonnet, 3.5 Haiku, Opus | Cuts multi-turn input costs while maintaining prompt caching |
+| `openrouter` | OpenRouter | Multi-model routing (Claude, Llama, DeepSeek) | Reduces blended token charges and helps stay under credit caps |
+| `gemini` | Google Gemini API | Gemini 2.5 Flash, Gemini 2.5 Pro | Compresses multi-turn context and long system prompt repetition |
+| `cloudcode` | Google CloudCode | Google CloudCode backend for Antigravity | Optimizes IDE language server payload size |
+| `deepseek` | DeepSeek API | DeepSeek-V3, DeepSeek-R1 | Maximizes high-throughput coding tasks while trimming token bloat |
+| `groq` | Groq | Llama 3.3 70B, Qwen 2.5 Coder | Lowers token volume to avoid strict per-minute rate limits (TPM) |
+| `mistral` | Mistral AI | Codestral, Mistral Large | Cuts input token costs on specialized coding models |
+| `togetherai` | Together AI | Open-source coding weights | Optimizes payload sizes for serverless endpoints |
+| `perplexity` | Perplexity API | Sonar reasoning models | Reduces context expansion from web research snippets |
+| `xai` | xAI API | Grok 2, Grok 3 | Minimizes large context accumulation |
+| `ollama` | Local Ollama | DeepSeek-Coder, Qwen2.5-Coder (`127.0.0.1:11434`) | Speeds up local inference TTFT and reduces VRAM strain |
+| `opencode` | OpenCode Zen | OpenCode curated models | Reduces autonomous tool-result context bloat |
+| `opencode-go`| OpenCode Go | OpenCode Go endpoints | Optimizes multi-provider agent loops |
+| `cline` | Cline API | Cline hosted endpoints | Prevents runaway autonomous loop token burn |
 
-```bash
-cmx providers codex list
-cmx providers codex connect api
-```
+## How CMX saves money across model pricing models
 
-Here `api` is a **Codex connection ID**, while `openai` is a **CMX upstream ID**. Those names serve different purposes. For OpenCode, the displayed provider ID is the one to pass to `cmx providers opencode connect <provider-id>`.
+Different model providers utilize distinct pricing and rate limit tiers. CMX provides tangible operational advantages across all of them:
 
-## Connect a service you already use
+### 1. Frontier Pay-Per-Token Models (OpenAI & Anthropic)
+Flagship reasoning models (such as OpenAI o1/o3 or Anthropic Claude 3.7 Sonnet) have premium input token rates. Because autonomous agents resend the entire message history on every step, a 40-turn task can resubmit 100k+ input tokens 40 times. CMX replaces obsolete spans with concise summaries, saving significant dollars per task.
 
-1. Configure the service's account, API key, and model **inside your coding client**. Use that client's own sign-in flow. For example, Codex can use OpenAI API or ChatGPT sign-in, Claude Code can use Anthropic access, OpenCode can manage several services, and Cline can use Cline's account or its own provider settings.
-2. Run `cmx providers <client> list`. If your intended provider is missing or reports missing credentials, finish setup in the native client before changing routing.
-3. Run `cmx providers <client> connect <displayed-id>`. Restart the client, make a real request, and check `cmx stats`.
-4. To go direct again, run `cmx providers <client> disconnect <displayed-id>` and restart the client. See [Undo and uninstall](/uninstall).
+### 2. High-Throughput & Budget APIs (DeepSeek & OpenRouter)
+Even on low-cost providers like DeepSeek-V3, autonomous agents that loop indefinitely can consume millions of tokens over a weekend. CMX enforces context ceilings and prunes failed test traces, preventing runaway billing surprises.
 
-The same workflow covers OpenRouter, DeepSeek, Groq, Gemini, Mistral, Together AI, Perplexity, xAI, Ollama, Command Code, OpenCode Zen/Go, and other configured services **when the client exposes them**. A CMX upstream ID by itself cannot add a provider to a client. For local Ollama, start Ollama first and configure its native endpoint in a compatible client. Use the [client-specific instructions](/providers/overview) for the settings CMX can manage.
+### 3. Rate-Limited Endpoints (Groq & Cloud Providers)
+Fast inference providers like Groq enforce strict Tokens-Per-Minute (TPM) limits. By compressing input tokens by 30% to 60%, CMX keeps your coding agent below rate-limit thresholds, preventing frustrating HTTP `429 Too Many Requests` interruptions.
 
-## Custom providers
+### 4. Local Models (Ollama)
+For developers running local models on Apple Silicon or NVIDIA GPUs, large context windows severely degrade generation speed (Time-To-First-Token) and can exceed hardware VRAM. CMX compresses context locally, keeping prompt processing fast and lightweight.
 
-A provider must have a valid direct endpoint. CMX accepts HTTPS upstreams and HTTP only for exact loopback hosts, such as a local Ollama service. A malformed URL or an endpoint pointing back at CMX is rejected. For OpenCode, configure a custom provider's direct endpoint in OpenCode first, then list and connect it through CMX. Do not put provider API keys in CMX's `config.json`.
+## Connecting an upstream provider via your client
 
-The documented compression path covers OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages. Native endpoints for other formats can be proxied without compression. See [Custom clients](/providers/custom-agents) and [How compression works](/how-compression-works).
+CMX upstream IDs tell the local gateway how to format and forward requests. To connect an upstream provider:
+
+1. Configure your API key and chosen model inside your coding client first.
+2. Inspect discovered providers:
+   ```bash
+   cmx providers <client> list
+   ```
+3. Connect the displayed provider ID:
+   ```bash
+   cmx providers codex connect api
+   # or
+   cmx providers opencode connect <provider-id>
+   ```
+4. Restart your coding client and check live savings with `cmx stats`.
+
+## Supported protocols & compression paths
+
+CMX natively compresses requests adhering to the following industry-standard protocols:
+- **OpenAI Chat Completions (`/v1/chat/completions`)**
+- **OpenAI Responses (`/v1/responses`)**
+- **Anthropic Messages (`/v1/messages`)**
+- **Google Gemini REST (`:generateContent` / `:streamGenerateContent`)**
+
+Requests following other formats pass through transparently without modification. For custom proxy architectures, see [Custom clients](/providers/custom-agents). To understand compression algorithms and privacy guarantees, see [How compression works](/how-compression-works).

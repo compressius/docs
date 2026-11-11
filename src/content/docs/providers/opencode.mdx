@@ -1,33 +1,76 @@
 ---
-title: "Connect OpenCode"
+title: "OpenCode Token Compression & Usage Optimization | Connect OpenCode"
 sidebarTitle: "OpenCode"
-description: "Connect an OpenCode provider through CMX without changing native credentials or other provider settings."
+description: "Compress context and save tokens across OpenCode model providers. Reduce repetitive conversation tokens locally without exposing API keys."
 ---
 
-# Connect OpenCode
+# Connect OpenCode for token compression & usage optimization
 
-OpenCode may have several model providers. CMX routes the one you select. Sign in through OpenCode and choose a model there first:
+OpenCode token compression enables developers using OpenCode to optimize conversation context, prevent runaway token burn, and lower API costs across their configured model providers. Running locally on `127.0.0.1:17322`, CMX intercepts OpenCode's provider requests, compresses older turns, and prunes repetitive tool outputs before forwarding requests to upstream LLMs.
+
+OpenCode allows developers to configure multiple model providers simultaneously. CMX provides granular, per-provider routing so you can compress token-heavy routes while preserving your native settings, models, and credentials.
+
+## Why OpenCode sessions burn high token volumes
+
+OpenCode provides an autonomous coding environment capable of executing shell commands, browsing project workspaces, and applying complex multi-file refactors. During continuous development:
+- Every terminal command and script execution produces verbose standard output and error traces.
+- File inspections and syntax evaluations accumulate in the active message stack.
+- **The entire interaction history is resubmitted** on each consecutive step.
+
+In extended coding sessions, resubmitting 50k–100k+ input tokens on every turn leads to steep API charges and can cause the model to lose track of earlier project context ("context rot").
+
+## How CMX optimizes OpenCode token usage
+
+- **Prunes obsolete tool outputs:** Removes duplicate error logs, outdated terminal outputs, and intermediate file reads from older conversational turns.
+- **Compresses earlier history:** Summarizes earlier multi-turn dialogs once session length crosses your threshold, keeping requests compact.
+- **Maintains active code accuracy:** The active prompt, recent conversational tail, and protected tool arguments remain completely unaltered.
+- **Zero credential sharing:** Native provider API keys remain inside OpenCode's JSON/JSONC configuration; CMX only manages the local gateway routing.
+
+## Setup: Connect an OpenCode provider to CMX
+
+Authenticate with your chosen model provider inside OpenCode first, then inspect and connect the route:
 
 ```bash
+# 1. Sign in through OpenCode natively
 opencode auth login
-cmx setup --ask-connect-ready
+
+# 2. Inspect discovered OpenCode providers (read-only)
 cmx providers opencode list
 ```
 
-The list shows provider IDs, credential readiness, and whether each route is native or connected to CMX. **Listing is read only.** Connect one of the IDs shown:
+The output displays discovered provider IDs, credential readiness, and current connection states. Connect your desired provider ID:
 
 ```bash
+# Connect the selected provider ID (e.g., opencode, opencode-go, or custom)
 cmx providers opencode connect <provider-id>
 ```
 
-For example, the ID might be `opencode`, `opencode-go`, or a provider you configured in OpenCode. Some custom providers need a direct HTTPS endpoint in OpenCode before CMX can connect them. CMX preserves native options and authentication while adding its local route. It supports OpenCode JSON and JSONC configuration and the `OPENCODE_CONFIG` override.
+CMX updates the provider route in OpenCode's configuration (supporting both JSON and JSONC formats, and the `OPENCODE_CONFIG` override) to route traffic through `127.0.0.1:17322`.
 
-Restart OpenCode, send a request, then check `cmx stats` and `cmx harness verify`.
+## Verify live token compression
 
-## Return to OpenCode directly
+1. Restart OpenCode or reopen your terminal session.
+2. Send a coding prompt or run an automated task in OpenCode.
+3. Check real-time token compression and verify gateway connectivity:
 
 ```bash
-cmx providers opencode disconnect <provider-id>
+# Verify that OpenCode connects through the running CMX gateway
+cmx harness verify
+
+# Inspect real-time token compression and savings statistics
+cmx stats
 ```
 
-This restores that provider's native route and retains unrelated OpenCode edits made while routed. To remove all CMX routing from OpenCode, use `cmx harness disable opencode`. Restart OpenCode afterward. If restoration reports a conflict, keep CMX installed and follow [Troubleshooting](/troubleshooting); do not delete its backup files manually.
+## Return to direct OpenCode routing
+
+To disconnect a specific provider and restore its native direct route:
+
+```bash
+# Disconnect the specified provider route
+cmx providers opencode disconnect <provider-id>
+
+# Or disable the OpenCode harness completely
+cmx harness disable opencode
+```
+
+Restart OpenCode afterward. Unrelated configuration changes made in OpenCode while routed through CMX are safely preserved during disconnection.

@@ -1,58 +1,89 @@
 ---
-title: "Connect a custom client"
+title: "Custom AI Coding Agent Token Compression | Connect Any LLM Client"
 sidebarTitle: "Custom clients"
-description: "Route a client with a configurable OpenAI, Anthropic, or Gemini API base URL through CMX."
+description: "Route custom coding agents and LLM frameworks through CMX. Cut token usage on OpenAI, Anthropic, and Gemini base URLs with local context compression."
 ---
 
-# Connect a custom client
+# Connect custom AI coding agents for token compression
 
-Use this guide when your coding tool is not one of the [six supported clients](/providers/overview), but it lets you set its API base URL. The supported clients with dedicated integrations and automated routing via `cmx harness enable <name>` are:
+Custom AI coding agent token compression allows developers building bespoke agentic loops or using third-party tools (such as LangChain, AutoGen, CrewAI, DSPy, Cursor, or proprietary CLI scripts) to reduce input token volume and lower LLM API expenses. By changing your client's API base URL to the local CMX gateway on `127.0.0.1:17322`, CMX compresses multi-turn context and prunes repetitive tool outputs across OpenAI, Anthropic, and Gemini protocols.
 
-- [Codex](/providers/codex)
-- [OpenCode](/providers/opencode)
-- [Claude Code](/providers/claude-code)
-- [Aider](/providers/aider)
-- [Antigravity CLI (`agy`)](/providers/antigravity)
-- [Cline](/providers/cline)
+While CMX provides dedicated, automated integrations for [six official clients](/providers/overview), any tool or framework that allows setting an API base URL can connect to CMX without code modifications.
 
-The custom tool must speak a protocol CMX can proxy, and its model provider must already be configured. Custom tools are not automatically detected or restored by `cmx harness` commands.
+## Why custom agentic loops burn tokens rapidly
 
-## Choose a base URL
+Autonomous agentic loops and agent frameworks operate through iterative reasoning-action cycles:
+- Executing code against compilers, linters, and test suites.
+- Fetching documentation, browsing web pages, and querying internal vector databases.
+- Accumulating thousands of lines of intermediate JSON payloads and tool outputs.
 
-Start the gateway:
+Because autonomous agents submit their entire conversational history on every turn, input token counts grow rapidly. Without local compression, a 40-step agent run can easily consume millions of input tokens, driving up costs and degrading model attention on earlier project constraints.
+
+## How to connect any custom agent to CMX
+
+Start the local CMX gateway:
 
 ```bash
+# Start the local gateway and verify status
 cmx start
 cmx status
 ```
 
-Set the base URL in your tool's settings. Use the route for the upstream provider you intend to reach:
+Configure your framework or tool's base URL environment variable (e.g., `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL`) or settings to point to the appropriate CMX loopback route:
 
-| Client protocol | Example base URL |
-| --- | --- |
-| OpenAI-compatible API | `http://127.0.0.1:17322/route/openai/v1` |
-| Anthropic Messages | `http://127.0.0.1:17322/route/anthropic` |
-| Google Gemini (REST / SSE) | `http://127.0.0.1:17322/route/gemini` |
-| Local Ollama | `http://127.0.0.1:17322/route/ollama` |
+| Upstream protocol | Example CMX base URL | Supported target services |
+| --- | --- | --- |
+| **OpenAI-compatible API** | `http://127.0.0.1:17322/route/openai/v1` | OpenAI (GPT-4o, o1, o3), OpenRouter, DeepSeek, Groq |
+| **Anthropic Messages** | `http://127.0.0.1:17322/route/anthropic` | Anthropic (Claude 3.7 Sonnet, Claude 3.5 Haiku, Opus) |
+| **Google Gemini (REST / SSE)** | `http://127.0.0.1:17322/route/gemini` | Google Gemini API (Gemini 2.5 Flash, 2.5 Pro) |
+| **Local Ollama** | `http://127.0.0.1:17322/route/ollama` | Local Ollama running at `127.0.0.1:11434` |
 
-Replace `openai`, `anthropic`, `gemini`, or `ollama` with another configured upstream ID where that provider supports the same protocol. Different clients append paths differently: for example, an OpenAI SDK may append `/chat/completions` to a `/v1` base URL. Check your client's base-URL documentation before changing it. Do not send provider keys in documentation, logs, or support messages; let the client supply them in its normal authentication fields.
+Replace `openai`, `anthropic`, `gemini`, or `ollama` with any supported upstream ID. Your native API keys stay with your client—pass them as standard `Authorization: Bearer <token>` or `x-api-key` headers.
 
-CMX also supports path routing through `/route/<provider>/...` and `/provider/<provider>/...`, the `cmx_provider` query parameter, the `X-CMX-Provider` header, and the `X-CMX-Base-URL` header for a dynamic direct endpoint. These are advanced options for clients that expose request-level routing. Use a valid HTTPS upstream URL, or an exact loopback HTTP endpoint for local models.
+## Advanced request-level routing
 
-## Native Gemini support
+CMX supports multiple methods to dynamically route traffic from custom clients:
+- **URL Path routing:** `/route/<provider>/...` or `/provider/<provider>/...`
+- **Query parameter:** `?cmx_provider=<provider-id>`
+- **HTTP Header:** `X-CMX-Provider: <provider-id>`
+- **Dynamic upstream endpoint:** `X-CMX-Base-URL: https://custom-endpoint.example.com/v1`
 
-CMX includes a native Google Gemini adapter. If your tool speaks the Gemini REST format directly (`/v1beta/models/{model}:generateContent` and `:streamGenerateContent`), point it at `http://127.0.0.1:17322/route/gemini`. CMX forwards requests including SSE streams with `alt=sse`, extracts usage from `usageMetadata`, and preserves `functionCall`, `functionResponse`, and `thought` parts intact.
+## Native Google Gemini adapter
 
-If your tool speaks Gemini's OpenAI-compatible endpoint instead, use `http://127.0.0.1:17322/route/gemini/v1`.
+CMX includes a native adapter for Google Gemini. If your tool communicates directly via the Gemini REST format (`/v1beta/models/{model}:generateContent` and `:streamGenerateContent`), point it at:
 
-## Endpoint path normalization
+```text
+http://127.0.0.1:17322/route/gemini
+```
 
-If your tool sends a bare path like `/chat/completions` or `/responses` without a `/v1` prefix, CMX automatically prepends `/v1` before forwarding to the upstream. For example, `http://127.0.0.1:17322/route/openai/chat/completions` and `http://127.0.0.1:17322/route/openai/v1/chat/completions` both reach `https://api.openai.com/v1/chat/completions`.
+CMX transparently handles server-sent events (`alt=sse`), extracts usage from `usageMetadata`, and preserves `functionCall`, `functionResponse`, and `thought` parts without breaking tool calls. If your tool uses Gemini's OpenAI-compatible endpoint instead, route to `http://127.0.0.1:17322/route/gemini/v1`.
 
-## Verify and undo
+## Automatic endpoint path normalization
 
-Restart the client, send a request, then compare `cmx stats` before and after. `cmx harness verify` cannot check a custom client that it does not manage.
+If your custom agent framework sends bare endpoints like `/chat/completions` or `/responses` without a `/v1` prefix, CMX automatically normalizes the path by prepending `/v1` before forwarding to the upstream provider:
 
-To undo this setup, restore the tool's original API base URL in **that tool** and restart it. Then run `cmx stop` if no other clients need the gateway. CMX cannot restore configuration it did not change.
+```text
+# Both paths route cleanly to https://api.openai.com/v1/chat/completions:
+http://127.0.0.1:17322/route/openai/chat/completions
+http://127.0.0.1:17322/route/openai/v1/chat/completions
+```
 
-For a first-class integration request, [suggest a client](/providers/suggest-provider).
+## Verify live token compression
+
+1. Run a request or start an agent loop in your custom tool.
+2. Check real-time token compression and gateway activity:
+
+```bash
+# View live session statistics and token reduction
+cmx stats
+```
+
+## Return to direct routing
+
+To disconnect your custom client, restore its original base URL in that tool's settings or unset your environment variables. Then stop the gateway if no other clients require it:
+
+```bash
+cmx stop
+```
+
+To request a dedicated native integration with automated harness management for your tool, see [Request an integration](/providers/suggest-provider).

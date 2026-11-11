@@ -1,25 +1,66 @@
 ---
-title: "Connect Claude Code"
+title: "Claude Code Token Optimization & Cost Reduction | Connect Claude Code"
 sidebarTitle: "Claude Code"
-description: "Connect Claude Code's Anthropic API route through the local CMX gateway."
+description: "Reduce Claude Code context window bloat, save Anthropic API tokens, and cut Claude Sonnet & Opus usage costs with local CMX context compression."
 ---
 
-# Connect Claude Code
+# Connect Claude Code for token optimization & cost reduction
 
-Install Claude Code and configure its Anthropic access first. CMX detects its settings and can set `ANTHROPIC_BASE_URL` to the local gateway. The documented ready check looks for `ANTHROPIC_API_KEY` in Claude Code's environment; a browser sign-in alone may not appear as ready in `cmx providers claude list`.
+Claude Code token optimization allows engineers using Anthropic's official Claude Code CLI to save on API tokens, mitigate context bloat, and lower costs on Claude 3.7 Sonnet, Claude 3.5 Sonnet, and Opus models. CMX runs locally on `127.0.0.1:17322`, intercepting requests via `ANTHROPIC_BASE_URL` to compress older context before sending tokens to Anthropic.
+
+Claude Code is an autonomous CLI coding agent that navigates large codebases, runs tests, and applies code edits. In extended sessions, Claude Code frequently resubmits tens of thousands of historical tokens on every command, causing rapid token burn and higher API expenses.
+
+## Why Claude Code burns substantial Anthropic tokens
+
+Claude Code operates through continuous agentic loops:
+- Reading source files, configs, and directory hierarchies.
+- Executing terminal commands, linters, and unit tests.
+- Storing every tool execution result directly in the active conversation context.
+
+Because Anthropic bills per input and output token, re-transmitting 50k–150k input tokens on every turn of a complex task creates steep cost escalation. In addition to financial costs, accumulating massive context windows can cause **attention degradation**, where the model misses nuanced requirements mentioned early in the conversation.
+
+## How CMX saves tokens in Claude Code
+
+- **Pruning tool output noise:** Strips redundant terminal outputs, repeat compiler warnings, and obsolete test runs from older turns.
+- **Context compression:** Replaces eligible older conversation history with compact, verified summaries once context reaches your threshold.
+- **Preserving prompt caching synergy:** Retains the system instructions and recent context tail so Anthropic's prompt caching continues to function effectively.
+- **Local privacy guarantee:** Your `ANTHROPIC_API_KEY` stays in your native environment. Code content is processed locally and forwarded directly to Anthropic's official endpoints.
+
+## Setup: Connect Claude Code to CMX
+
+Ensure Claude Code is installed and configured with your Anthropic API access (`ANTHROPIC_API_KEY`), then enable the CMX integration:
 
 ```bash
-cmx setup --ask-connect-ready
+# 1. Inspect detected Claude Code status
 cmx providers claude list
+
+# 2. Connect Claude Code to the local gateway
 cmx harness enable claude
 ```
 
-Keep your provider key in Claude Code's native environment, never in CMX configuration. Restart Claude Code, send a request, then compare `cmx stats` before and after. `cmx harness verify` checks that the client points to a live gateway.
+CMX configures Claude Code's routing by setting `ANTHROPIC_BASE_URL` to point to the local CMX gateway on `127.0.0.1:17322`.
 
-## Return to a direct connection
+## Verify live token savings
+
+1. Open a new terminal session or launch Claude Code.
+2. Send a coding request or run a task in Claude Code.
+3. Verify that requests route through CMX and observe real-time token savings:
 
 ```bash
+# Confirm the connection to the running gateway
+cmx harness verify
+
+# Inspect live token compression metrics and savings estimates
+cmx stats
+```
+
+## Return to direct Anthropic routing
+
+To disconnect Claude Code and resume direct, unproxied connections to Anthropic:
+
+```bash
+# Disable the Claude Code harness
 cmx harness disable claude
 ```
 
-CMX restores the pre-connect settings while preserving unrelated edits when it can reconcile them. Restart Claude Code afterward. If your Claude Code account uses a subscription login rather than an API key, test a real request before relying on this route; native authentication behavior can differ by account and client version.
+Restart Claude Code afterward. `cmx stop` also automatically restores direct routing before terminating the local gateway. If you need to keep Claude Code permanently direct, use `cmx harness disable claude`.

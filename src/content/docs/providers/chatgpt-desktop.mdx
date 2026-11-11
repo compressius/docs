@@ -1,13 +1,49 @@
 ---
-title: "ChatGPT Desktop support"
+title: "ChatGPT Desktop Token Compression & Alternatives | CMX Support"
 sidebarTitle: "ChatGPT Desktop"
-description: "Current CMX support status for the ChatGPT Desktop application."
+description: "Understand ChatGPT Desktop token compression options and how to route ChatGPT credentials through Codex CLI with CMX to reduce token usage."
 ---
 
-# ChatGPT Desktop support
+# ChatGPT Desktop token compression & alternatives
 
-CMX does not currently have an automatic integration for the ChatGPT Desktop application. The app does not appear in `cmx harness list`, and there is no **CONFIG → ChatGPT Desktop** connection in CMX.
+ChatGPT Desktop token compression explains how developers can optimize AI context and token usage when using OpenAI ChatGPT subscriptions for coding tasks. While the standalone ChatGPT Desktop application does not expose custom network proxy settings, developers can achieve full token compression and cost optimization by connecting their ChatGPT subscription through the official OpenAI Codex CLI routed via CMX.
 
-If you use OpenAI's **Codex** coding client, follow the [Codex guide](/providers/codex). Codex can use a ChatGPT sign-in through its `chatgpt` connection mode. That is a Codex integration; it does not change ChatGPT Desktop.
+Developers frequently search for ways to reduce context limits, avoid rate limits, and compress conversation history in ChatGPT Desktop during extensive software development projects.
 
-For another tool with a configurable API base URL, see [Custom clients](/providers/custom-agents).
+## Why standalone ChatGPT Desktop cannot be proxied directly
+
+The official ChatGPT Desktop application (for macOS and Windows) is a packaged native client that communicates directly with OpenAI's closed endpoints. Unlike developer-focused coding agents:
+- It does not expose configurable `OPENAI_BASE_URL` or custom proxy environment variables.
+- It does not provide access to local configuration files for network re-routing.
+- Consequently, it does not appear in `cmx harness list`.
+
+## Recommended solution: Route ChatGPT subscription via Codex CLI
+
+If you want the benefits of your ChatGPT subscription (Plus, Team, or Enterprise) combined with CMX local token compression and autonomous coding agent workflows, the recommended approach is to use **OpenAI Codex CLI**:
+
+1. Install and log in to OpenAI Codex using your ChatGPT account:
+   ```bash
+   codex login
+   ```
+2. Connect Codex's ChatGPT sign-in mode to the local CMX compression gateway:
+   ```bash
+   cmx providers codex connect chatgpt
+   ```
+3. Restart Codex and verify that traffic is compressing:
+   ```bash
+   cmx stats
+   ```
+
+By routing through Codex's `chatgpt` mode, your existing ChatGPT subscription covers model usage while CMX intercepts local requests on `127.0.0.1:17322`, compressing repetitive tool outputs, summarising historical context, and preventing context rot.
+
+For complete setup instructions, see the [Codex integration guide](/providers/codex).
+
+## Other tools with configurable API base URLs
+
+If you are using a third-party developer tool, IDE extension, or custom agent framework that allows configuring an OpenAI-compatible API base URL, you can route it through CMX directly. Point its base URL to:
+
+```text
+http://127.0.0.1:17322/route/openai/v1
+```
+
+For full details on endpoint normalization and path routing, see [Custom clients](/providers/custom-agents).

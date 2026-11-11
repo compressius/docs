@@ -1,36 +1,79 @@
 ---
-title: "Connect Codex"
+title: "Codex AI Token Compression & Cost Reduction | Connect Codex"
 sidebarTitle: "Codex"
-description: "Route Codex OpenAI API or ChatGPT requests through CMX and restore direct routing."
+description: "Compress conversation context, save on OpenAI token usage, and reduce API costs in Codex CLI and ChatGPT mode with local CMX gateway on 127.0.0.1:17322."
 ---
 
-# Connect Codex
+# Connect Codex for AI token compression
 
-Codex supports two native sign-in modes: OpenAI API (`api`) and ChatGPT (`chatgpt`). Sign in through Codex first. CMX leaves its native credentials with Codex.
+Codex AI token compression allows developers using OpenAI Codex CLI to cut token usage, prevent context window overflow, and significantly reduce API costs by routing requests through a local CMX gateway on `127.0.0.1:17322`. CMX compresses older conversation context and prunes repetitive tool outputs before forwarding requests to OpenAI.
+
+Codex supports two native sign-in modes: **OpenAI API (`api`)** and **ChatGPT subscription (`chatgpt`)**. CMX leaves your native credentials inside Codex's configuration while establishing a local loopback route that optimizes input tokens transparently.
+
+## Why Codex burns excessive OpenAI tokens
+
+When you use Codex for multi-step feature development or bug fixing, the agent executes autonomous tool calls:
+- Reading multiple project files and directory trees.
+- Running terminal commands, builds, and test suites.
+- Receiving lengthy terminal outputs, compilation errors, and git diffs.
+
+On every single interaction, Codex **resubmits the accumulated conversation history** to OpenAI. In longer coding sessions, this causes input token volume to explode to tens of thousands of tokens per prompt, accelerating API billing and risking rate limits or model degradation ("context rot").
+
+## How CMX optimizes Codex token consumption
+
+1. **Prunes historical tool noise:** Removes duplicate test outputs, redundant file listings, and obsolete error messages.
+2. **Summarizes eligible older context:** Compacts earlier conversational turns into concise model-validated summaries once your context threshold is reached.
+3. **Preserves critical code state:** Keeps recent files, active developer prompts, and protected tool arguments 100% untouched.
+4. **Zero credential leakage:** Your OpenAI API key and ChatGPT session remain securely stored in Codex; requests pass through the local CMX gateway on your own machine.
+
+## Setup: Connect Codex to CMX
+
+Complete Codex's native sign-in first, then inspect and connect the route:
 
 ```bash
+# 1. Sign in to Codex natively
 codex login
-cmx setup --ask-connect-ready
+
+# 2. Inspect discovered Codex providers
 cmx providers codex list
 ```
 
-If you declined the setup prompt, choose the mode that matches your Codex sign-in:
+Choose the mode matching your Codex sign-in:
 
 ```bash
+# For direct OpenAI API key users (pay-per-token):
 cmx providers codex connect api
-# or, for a ChatGPT sign-in:
+
+# Or, for ChatGPT subscription sign-in users:
 cmx providers codex connect chatgpt
 ```
 
-Use one mode at a time. CMX updates Codex's `config.toml` (normally `~/.codex/config.toml`; `CODEX_HOME` is supported) and starts the gateway if needed. Restart Codex, send a request, and check `cmx stats`. `cmx harness verify` checks whether Codex points at a running gateway.
+CMX updates Codex's configuration file (located at `~/.codex/config.toml` or `$CODEX_HOME/config.toml`) with the local gateway route and automatically launches the CMX gateway if it is not already running.
 
-## Return to Codex directly
+## Verify live token compression
+
+1. Restart your Codex CLI terminal so it loads the updated routing.
+2. Send a prompt or run a coding task in Codex.
+3. Verify live traffic and token savings from your terminal:
 
 ```bash
-cmx providers codex disconnect api
-# Substitute chatgpt if that was the connected mode.
+# Verify that Codex is communicating through the gateway
+cmx harness verify
+
+# Check real-time token reduction and session statistics
+cmx stats
 ```
 
-You can also run `cmx harness disable codex`. Restart Codex afterward. `cmx stop` restores direct settings while stopping the gateway; a later `cmx start` can reconnect previously selected routes. An explicit disconnect or disable is the way to stay direct.
+## Return to direct Codex routing
 
-If `cmx providers codex list` says credentials are missing, complete Codex's native sign-in. For API-key mode, use Codex's supported key input or an environment variable; never paste keys into CMX config or support messages. See [Troubleshooting](/troubleshooting).
+To return Codex to its direct unproxied connection without CMX compression:
+
+```bash
+# Disconnect the active mode (api or chatgpt)
+cmx providers codex disconnect api
+
+# Or disable the Codex harness completely
+cmx harness disable codex
+```
+
+Restart Codex afterward. When you stop the gateway with `cmx stop`, CMX automatically restores Codex's original configuration before shutting down. To keep Codex permanently connected directly to OpenAI, use the explicit disconnect command above.

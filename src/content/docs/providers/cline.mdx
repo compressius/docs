@@ -1,25 +1,66 @@
 ---
-title: "Connect Cline"
+title: "Cline Token Reduction & Context Compression | Connect Cline VS Code"
 sidebarTitle: "Cline"
-description: "Connect Cline CLI or detected Cline settings to CMX and restore the native provider route."
+description: "Prevent runaway token loops, compress autonomous agent history, and save Anthropic API costs in Cline VS Code and CLI with local CMX gateway."
 ---
 
-# Connect Cline
+# Connect Cline for token reduction & runaway loop protection
 
-CMX detects Cline provider settings, including the CLI's `~/.cline/data/settings/providers.json` path and supported editor storage locations. Install Cline and sign in through Cline first. For the CLI, use `cline auth`; for the VS Code extension, use its own sign-in or provider settings.
+Cline token reduction enables developers using Cline in VS Code or the Cline CLI to cut token consumption, prevent runaway agent loops, and save on Anthropic, OpenAI, and OpenRouter API costs. Running locally on `127.0.0.1:17322`, CMX intercepts Cline's model requests, compressing conversation history and truncating repetitive terminal outputs before requests reach upstream LLMs.
+
+Cline is an autonomous coding assistant that executes terminal commands, reads workspace files, edits code, and navigates browser sessions. Because Cline operates in deep agentic loops, extended tasks can rapidly balloon context sizes to 100k+ tokens per step, consuming credits quickly and degrading model focus.
+
+## Why Cline autonomous loops burn excessive API tokens
+
+Cline workflows involve frequent multi-step autonomous iterations:
+- Continuously reading source files and directory listings.
+- Executing bash commands, unit tests, and terminal builds.
+- Accumulating compiler outputs, stack traces, and intermediate git diffs.
+
+On every iteration of an autonomous task, Cline **re-submits the entire conversation history** back to your model provider (such as Claude 3.7 Sonnet or Claude 3.5 Sonnet). When an agent enters a debugging loop attempting several variations of a fix, token burn compounds exponentially—often draining \$10 to \$50 in API credits during a single task.
+
+## How CMX protects Cline workflows and saves tokens
+
+- **Truncates repetitive loop outputs:** Strips duplicate error messages, obsolete terminal logs, and failed command outputs from earlier turns.
+- **Compresses historical context:** Summarizes earlier phases of the conversation once your context threshold is crossed, keeping token payloads lightweight.
+- **Preserves active execution state:** The active user prompt, current file edits, and protected tool definitions remain completely intact.
+- **Zero credential sharing:** Your Anthropic, OpenAI, or OpenRouter API keys remain securely inside Cline's native settings; CMX only updates the local loopback routing endpoint.
+
+## Setup: Connect Cline to CMX
+
+Install Cline and complete your provider sign-in inside Cline first (via `cline auth` for the CLI or the provider settings panel in the VS Code extension), then connect the CMX harness:
 
 ```bash
-cmx setup --ask-connect-ready
+# 1. Inspect detected Cline installations and provider readiness
 cmx providers cline list
+
+# 2. Enable CMX routing for Cline
 cmx harness enable cline
 ```
 
-CMX changes Cline's selected provider base URL and routing header. Reload your VS Code window or restart the Cline CLI, send a request, and check `cmx stats`. Provider availability and API behavior depend on the Cline mode you use; verify a real request before relying on the integration.
+CMX detects Cline configuration across your operating system (including the CLI's `~/.cline/data/settings/providers.json` and supported VS Code extension storage paths) and updates the active provider base URL and routing headers to point to `127.0.0.1:17322`.
 
-## Return to Cline directly
+## Verify live token compression
+
+1. Reload your VS Code window (`Developer: Reload Window`) or restart the Cline CLI.
+2. Trigger a coding task or prompt in Cline.
+3. Verify live gateway traffic and monitor token reduction:
 
 ```bash
+# Verify that Cline connects through the running CMX gateway
+cmx harness verify
+
+# Inspect live token compression statistics and cost savings
+cmx stats
+```
+
+## Return to direct Cline routing
+
+To restore Cline's direct native routing and remove the CMX proxy configuration:
+
+```bash
+# Disable the Cline harness
 cmx harness disable cline
 ```
 
-Reload the editor or restart Cline again. CMX restores the pre-connect client settings when the restore can be completed. If Cline changed the same routing field in the meantime, follow [Troubleshooting](/troubleshooting) before uninstalling CMX.
+Reload VS Code or restart Cline afterward. CMX automatically restores your pre-connection configuration files. If you run `cmx stop`, CMX safely restores direct routing before terminating the gateway.

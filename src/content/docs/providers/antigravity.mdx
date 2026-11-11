@@ -1,29 +1,71 @@
 ---
-title: "Connect Antigravity (IDE & CLI)"
-sidebarTitle: "Antigravity"
-description: "Connect Google Antigravity IDE and agy CLI through CMX and safely restore original executables."
+title: "Google Antigravity Token Compression & Cost Reduction | IDE & agy CLI"
+sidebarTitle: "Antigravity (IDE & CLI)"
+description: "Cut token consumption and optimize CloudCode & Gemini context in Google Antigravity IDE and agy CLI. Compress agent loops locally on 127.0.0.1:17322."
 ---
 
-# Connect Antigravity (IDE & CLI)
+# Connect Google Antigravity (IDE & agy CLI) for token compression
 
-CMX provides native integrations for both the **Antigravity IDE** and the **Antigravity CLI (`agy`)**. Install Antigravity and sign in with your Google account before connecting.
+Google Antigravity token compression allows developers using Google's next-generation Antigravity IDE and `agy` CLI to cut token usage, eliminate context bloat, and reduce CloudCode and Gemini API charges. Running locally on `127.0.0.1:17322`, CMX intercepts language server and agentic calls, summarizing historical context before requests reach Google Cloud.
+
+Antigravity is designed for autonomous multi-agent workflows, deep repository comprehension, and complex multi-step reasoning. In sustained development sessions, Antigravity subagents and conversational threads accumulate massive context windows, causing steep token consumption and risk of model attention drift ("context rot").
+
+## Why Antigravity workflows consume extensive tokens
+
+Antigravity coordinates complex autonomous developer workflows:
+- Continuously indexing workspace symbols, references, and AST diagnostics.
+- Dispatching background subagents to analyze dependencies, write unit tests, and edit code.
+- Streaming multi-turn reasoning logs and tool execution outputs via Google Gemini and CloudCode endpoints.
+
+Every subsequent agent turn re-submits previous reasoning steps, tool results, and workspace references. Over multi-hour pair programming sessions, context volume frequently reaches 100k–200k+ input tokens per prompt, accelerating API billing and consuming quota.
+
+## How CMX optimizes Antigravity context locally
+
+- **Compresses agentic reasoning loops:** Summarizes completed subagent investigations and historical conversational turns once session thresholds are met.
+- **Prunes diagnostic and tool noise:** Strips redundant compiler diagnostics, repetitive linter warnings, and outdated test logs from historical context.
+- **Protects active workspace state:** Keeps the active developer prompt, recent conversational tail, active file diffs, and protected tool schemas 100% lossless.
+- **Reversible zero-risk shimming:** Places non-destructive wrapper shims around executables while preserving original `.real` companion binaries.
+- **Zero credential sharing:** Your native Google Cloud authentication and OAuth credentials remain securely managed by Antigravity.
+
+## Setup: Connect Antigravity IDE and agy CLI to CMX
+
+Install Google Antigravity and sign in with your Google account first, then enable the native CMX harness:
 
 ```bash
-cmx setup --ask-connect-ready
+# 1. Inspect detected Antigravity installations
 cmx harness list
+
+# 2. Enable CMX routing for Antigravity IDE and agy CLI
 cmx harness enable antigravity
 ```
 
-CMX detects Antigravity installations and places reversible shims around their execution paths:
+CMX detects Antigravity installations across your operating system and places reversible shims around their execution paths:
 - **Antigravity IDE:** Wraps the internal `language_server` binary (located in your Antigravity installation's `resources/bin/` directory) so language intelligence and model requests route through local CMX CloudCode and Gemini proxies.
 - **Antigravity CLI (`agy`):** Wraps `~/.local/bin/agy` (or platform equivalent) to export `CLOUD_CODE_URL` and `GOOGLE_GEMINI_BASE_URL` pointing to `127.0.0.1:17322`.
 
-CMX preserves the original executables as `.real` companion binaries. Launch Antigravity IDE or start an `agy` session, send a query, and check `cmx stats` or `cmx harness verify` to confirm live traffic routing.
+Original binaries are safeguarded as `.real` companion files (e.g. `language_server.real` and `agy.real`).
 
-## Return to direct routing
+## Verify live token compression
+
+1. Launch Antigravity IDE or start a new terminal session with `agy`.
+2. Send a coding prompt, run a task, or spawn an autonomous subagent.
+3. Verify live traffic and monitor token reduction:
 
 ```bash
+# Verify that Antigravity is routing through the active gateway
+cmx harness verify
+
+# Inspect real-time token compression and savings statistics
+cmx stats
+```
+
+## Return to direct Antigravity routing
+
+To restore original unmodified Antigravity binaries and disable CMX routing:
+
+```bash
+# Disable the Antigravity harness
 cmx harness disable antigravity
 ```
 
-This restores the original unmodified `language_server` and `agy` binaries. `cmx stop` and `cmx uninstall` also safely restore wrapped clients before shutting down or removing CMX. If restoration reports an edited config, resolve the conflict or use `cmx harness disable antigravity --force`.
+This immediately restores the original `language_server` and `agy` binaries. Running `cmx stop` or `cmx uninstall` also safely restores wrapped binaries before terminating the gateway. If an update altered the wrapper, use `cmx harness disable antigravity --force` to restore cleanly.

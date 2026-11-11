@@ -1,24 +1,69 @@
 ---
-title: "Supported coding clients"
-sidebarTitle: "Client overview"
-description: "Choose a CMX coding client integration and learn the difference between clients and model providers."
+title: "Supported AI Coding Clients & Token Optimization Guide | CMX"
+sidebarTitle: "Supported clients"
+description: "Compare supported AI coding agents (Codex, OpenCode, Claude Code, Aider, Antigravity, Cline) and discover how local CMX context compression cuts token costs."
 ---
 
-# Supported coding clients
+# Supported AI coding clients
 
-A coding client is the application you use. A model provider is the service that answers its API requests. CMX detects these six clients and can change their local routing settings. Install and sign in to the client first; CMX does not install it for you.
+Compressius Maximus (CMX) is a free, local-first AI gateway that compresses conversation context for autonomous coding agents before requests reach your model provider. By pruning duplicate tool outputs and summarizing older chat history on `127.0.0.1:17322`, CMX reduces input token usage, cuts API billing, and prevents context rot.
 
-| Client | What CMX changes | Guide |
-| --- | --- | --- |
-| Codex | Its selected OpenAI API or ChatGPT route in `config.toml` | [Codex](/providers/codex) |
-| OpenCode | One selected provider route in its JSON or JSONC config | [OpenCode](/providers/opencode) |
-| Claude Code | `ANTHROPIC_BASE_URL` in its settings | [Claude Code](/providers/claude-code) |
-| Aider | The OpenAI-compatible API base in its config | [Aider](/providers/aider) |
-| Antigravity (IDE & CLI) | Reversible wrappers around the IDE language server and `agy` CLI | [Antigravity](/providers/antigravity) |
-| Cline | Its provider settings, including the local base URL | [Cline](/providers/cline) |
+A **coding client** is the interactive developer tool or CLI you work in (such as Codex, OpenCode, Claude Code, Aider, Google Antigravity, or Cline). A **model provider** is the upstream LLM service that powers it (such as OpenAI, Anthropic, Google Gemini, OpenRouter, or DeepSeek). CMX configures client routing so model traffic flows through the local compression gateway while leaving your native API credentials and models untouched.
 
-Run `cmx harness list` to see what CMX detects on **your** machine. Run `cmx providers <client> list` to inspect discovered provider IDs and credential readiness. Listing does not change routing. A connected client normally needs a restart or editor reload before it uses new settings.
+## Supported clients & token compression matrix
 
-A different tool may work if it lets you set an API base URL and speaks a supported protocol. See [Custom clients](/providers/custom-agents). CMX does not offer an automatic ChatGPT Desktop integration.
+| Client | Protocol | What CMX changes | Token savings impact | Guide |
+| --- | --- | --- | --- | --- |
+| **Codex** | OpenAI API / ChatGPT | Selected route in `~/.codex/config.toml` | Compresses repetitive agent loops & file diffs | [Codex guide](/providers/codex) |
+| **OpenCode** | OpenAI / Anthropic / Gemini | Active provider in JSON/JSONC config | Reduces multi-turn tool output bloat | [OpenCode guide](/providers/opencode) |
+| **Claude Code** | Anthropic Messages | `ANTHROPIC_BASE_URL` environment route | Lowers Anthropic 3.7 Sonnet & Opus token spend | [Claude Code guide](/providers/claude-code) |
+| **Aider** | OpenAI-compatible / Anthropic | API base in `~/.aider.conf.yml` | Prunes git commit and repo map repetition | [Aider guide](/providers/aider) |
+| **Antigravity** | CloudCode / Gemini SSE | Wrappers for IDE language server & `agy` CLI | Cuts CloudCode & Gemini context bloat | [Antigravity guide](/providers/antigravity) |
+| **Cline** | Anthropic / OpenAI / OpenRouter | Selected provider base URL in VS Code / CLI | Prevents runaway autonomous loop costs | [Cline guide](/providers/cline) |
 
-To undo a connection, use `cmx providers <client> disconnect <provider-id>` for a selected provider or `cmx harness disable <client>` for the whole client. `cmx stop` restores direct routing before stopping the gateway. See [Undo and uninstall](/uninstall).
+## Why autonomous coding agents burn excessive tokens
+
+Unlike single-turn chat interfaces, agentic coding tools operate in continuous multi-step reasoning loops. In each turn of an investigation or refactoring session, the agent:
+1. Re-reads project files and directories.
+2. Executes bash commands and test suites.
+3. Receives long stack traces, compiler errors, or diffs.
+4. **Re-submits the entire conversation history** back to the LLM on every subsequent tool call.
+
+As a conversation stretches beyond 50 turns, submitting 80k–150k input tokens on *every single interaction* causes token consumption to compound quadratically. Developers frequently encounter surprise API bills and **attention degradation ("context rot")**, where the model begins forgetting earlier constraints or repeating failed edits.
+
+## How CMX solves context bloat locally
+
+CMX intercepts agent traffic on your local loopback address (`127.0.0.1:17322`):
+- **Tool output pruning:** Automatically truncates obsolete terminal outputs and duplicate failed test logs while preserving active diffs.
+- **Context compression:** Generates concise, validated summaries of older conversational turns once session length crosses your configured threshold.
+- **Context protection:** Keeps the active system prompt, developer instructions, recent conversation tail, and protected tool calls 100% intact.
+- **Privacy & security:** Your code and API keys never leave your machine; CMX Cloud receives only anonymous aggregate token counters when dashboard syncing is enabled.
+
+## Discovered clients and harness commands
+
+To inspect what clients and providers CMX detects on your machine:
+
+```bash
+# Check detected coding clients and routing status
+cmx harness list
+
+# Check discovered providers and credential readiness for a client
+cmx providers codex list
+cmx providers opencode list
+```
+
+Listing is read-only and makes zero configuration changes. To connect a detected client, follow the specific guide below or run `cmx setup --ask-connect-ready`.
+
+## Restoring direct connections
+
+You can disconnect any client and return to unproxied model routing at any time:
+
+```bash
+# Disconnect a specific client route
+cmx providers codex disconnect api
+
+# Or disable the client harness completely
+cmx harness disable codex
+```
+
+For custom agent frameworks or tools with configurable API base URLs (such as LangChain, AutoGen, or bespoke agents), see [Custom clients](/providers/custom-agents). To learn about supported upstream LLM APIs, see [Model providers](/model-providers).

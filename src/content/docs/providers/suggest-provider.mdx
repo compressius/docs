@@ -1,19 +1,42 @@
 ---
-title: "Request an integration"
-sidebarTitle: "Request an integration"
-description: "Suggest a coding client or model provider for CMX support."
+title: "Request an AI Coding Client or Provider Integration | CMX"
+sidebarTitle: "Suggest a provider"
+description: "Suggest a coding assistant, agentic loop, or LLM provider for native CMX token compression and automated routing support."
 ---
 
-# Request an integration
+# Request an AI coding client or provider integration
 
-CMX can configure [six coding clients](/providers/overview) and route to several [model providers](/model-providers). If yours is missing, send a request to [hello@compressi.us](mailto:hello@compressi.us?subject=CMX%20integration%20request).
+Request an integration to suggest new AI coding agents, IDE extensions, or LLM model providers for native CMX token compression and automated harness management. While CMX natively supports [six major clients](/providers/overview) (Codex, OpenCode, Claude Code, Aider, Antigravity, and Cline) and [15+ model provider routes](/model-providers), we actively expand support for emerging developer tools and frameworks.
 
-Please include:
+If you use tools like Cursor, Windsurf, Roo Code, Continue.dev, Goose, or custom agentic evaluation harnesses, we welcome integration requests.
 
-- The **coding client** or **model provider** name and version.
-- Your operating system and whether you use a CLI or editor extension.
-- A link to its public API or base-URL configuration documentation.
-- The protocol it uses, if known: OpenAI Chat Completions, OpenAI Responses, Anthropic Messages, or another format.
-- What you expected CMX to do.
+## How to submit an integration request
 
-Do not send API keys, raw prompts, responses, or private client configuration files. If the tool has a configurable API base URL, you may be able to use the [custom client guide](/providers/custom-agents) while a first-class integration is evaluated.
+Email our engineering team at [hello@compressi.us](mailto:hello@compressi.us?subject=CMX%20integration%20request) or open a GitHub discussion in [compressius/cmx](https://github.com/compressius/cmx).
+
+Please include the following technical specifications:
+- **Client or Provider Name:** The exact software name and version (e.g., Cursor 0.45+, Roo Code 3.x, Continue.dev).
+- **Environment & Platform:** Linux, macOS, or Windows; terminal CLI, VS Code extension, JetBrains plugin, or desktop GUI.
+- **Protocol & Payload Format:** OpenAI Chat Completions, OpenAI Responses, Anthropic Messages, Google Gemini REST, or custom streaming SSE.
+- **Configuration Mechanism:** Whether the tool reads environment variables (e.g. `OPENAI_BASE_URL`), uses a JSON/TOML configuration file, or supports an internal proxy setting.
+- **Expected Token Savings:** Typical context size and token consumption patterns in your daily workflows.
+
+:::caution
+Never share API keys, private passwords, proprietary source code, or confidential configuration files in integration requests.
+:::
+
+## Using your tool today via Custom Clients
+
+You do not need to wait for a native harness update if your tool supports setting an API base URL. Any tool supporting OpenAI, Anthropic, or Gemini endpoints can route through CMX immediately. 
+
+Point your tool's API base endpoint to:
+
+```text
+http://127.0.0.1:17322/route/openai/v1
+# or
+http://127.0.0.1:17322/route/anthropic
+# or
+http://127.0.0.1:17322/route/gemini
+```
+
+For complete setup instructions and endpoint normalization rules, see the [Custom clients guide](/providers/custom-agents).
